@@ -1,7 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 
 @SET_MAKE@
-AUTOMAKE_OPTIONS = 1.4 no-dependencies
+AUTOMAKE_OPTIONS = no-dependencies
+ACLOCAL_AMFLAGS = -I m4
 
 always_built_SUBDIRS = lib src man
 
@@ -33,6 +34,3 @@ dist-hook:
 	    rm -rf $(distdir)/$$subdir/CVS; \
 	    rm -rf $(distdir)/$$subdir/*/CVS; \
 	done
-
-##Bug in automake: Can't use `if MAINTAINER_MODE'
-@MAINTAINER_MODE_TRUE@include $(srcdir)/maintMakefile

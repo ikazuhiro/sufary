@@ -6,14 +6,15 @@ dnl Created  by Satoru Takabayashi <satoru-t@is.aist-nara.ac.jp> [1999-09-17]
 dnl
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(src/mkary.c)
+AC_INIT([sufary], [2.3.8])
 AC_PREREQ(2.13)               dnl Minimum Autoconf version required.
-AM_INIT_AUTOMAKE(sufary, 2.3.8)
+AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 
 dnl *
 dnl * libtool
 dnl *
+AC_CONFIG_MACRO_DIR([m4])
 AM_PROG_LIBTOOL
 
 dnl Checks for programs.

@@ -16,4 +16,4 @@ noinst_PROGRAMS = test
 test_SOURCES = test.c
 test_LDADD   = libsufary.la
 
-libsufary_la_LDFLAGS = -version-info 0:0:0
+libsufary_la_LDFLAGS = -no-undefined -version-info 0:0:0
