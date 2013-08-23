@@ -1,0 +1,38 @@
+body {
+	background-color: #e8e8e8;
+}
+pre {
+	margin-left: 2em;
+	color: Navy;
+}
+blockquote {
+	color: #004488;
+}
+em {
+	color: #000000;
+	background-color: #ffff88;
+}
+strong {
+	background-color: #ffaa77;
+}
+code {
+	color: Navy;
+}
+address {
+	text-align: right;
+}
+h2, h3, h4 {
+        border: 1pt solid;
+        padding: 0.1em 0.5em;
+}
+
+p.caption {
+	background-color: #ffcc99;
+}
+
+p.column       { margin-left: 2em; margin-right: 2em; color: #006600; }
+ul.column      { margin-left: 2em; color: #006600; }
+pre.column     { margin-left: 2em; color: #006600; }
+h3.column      { color: #006600; 
+	         background-color:   #ccffcc; 
+	         border: thin outset #006600; }

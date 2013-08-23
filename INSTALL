@@ -1,0 +1,22 @@
+
+* How to install
+
+  (1) ./configure
+  (2) make
+  (3) cd lib; ./test
+  (4) cd perl/SUFARY; ./setup.sh
+  (5) cd ../DID; ./setup.sh
+
+
+
+
+注意:
+
+しばらくの間、kwicview は動きません。
+
+lib/array* はメンテナンスされていません。
+
+src/mkdids はつくりかけでほったらかしです。
+
+doc/Tools.txt, doc/guide/* の内容は古いです。
+

@@ -1,0 +1,1673 @@
+\documentclass[a4j]{jarticle}
+%\documentstyle[a4j]{jarticle}
+%
+% cosmos:jlatex209 でコンパイル(990614) \documentstyle[a4j]{jarticle}
+% docserver:platex でコンパイル(990614) \documentclass[a4j]{jarticle}
+%
+
+\usepackage[dvips]{graphics}
+
+\newcommand{\sufary}{{\sf SUFARY}}
+
+\title{
+%{\normalsize \hrule height1ex \smallskip \hrule height.1ex }
+  ~\\ \huge \sufary ガイド\\
+%  \Large 1999-06-29版  \\
+  } 
+\author{山下達雄 \\
+  {\sf tatuo-y@cl.aist-nara.ac.jp}\\
+  奈良先端大学院大学 自然言語処理学講座
+  }
+
+\date{1999-06-29版}
+
+\setcounter{totalnumber}{4} \setcounter{topnumber}{4}
+\setcounter{bottomnumber}{2} \setcounter{dbltopnumber}{2}
+
+\renewcommand{\textfraction}{0.01} % １頁中の文の占める割合
+
+\renewcommand{\dbltopfraction}{1.00} % １頁中の図([t])の占める割合
+\renewcommand{\dblfloatpagefraction}{0.99} % ぶちぬき図
+
+\renewcommand{\bottomfraction}{0.99} % １頁中の図([b])の占める割合
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\maketitle
+
+\thispagestyle{empty}
+
+\begin{center}
+  \includegraphics{salogo.eps}
+\end{center}
+
+%\hrule height.1ex \smallskip \hrule height1ex
+
+\bigskip
+
+本文書は \sufary Version 2.1 に準拠しています。
+この文書に関する御意見・御感想等ございましたら、
+{\sf sufary-adm@cl.aist-nara.ac.jp} まで御連絡下さい。
+\sufary の最新情報に関しては \sufary ホームページ({\sf
+  http://cl.aist-nara.ac.jp/lab/nlt/ss/})を御覧下さい。
+
+
+\newpage
+
+
+\tableofcontents
+
+\bigskip
+\begin{center}
+  \includegraphics{zou2.eps}
+\end{center}
+
+
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{はじめに}\label{はじめに}
+
+\sufary は、
+suffix array\cite{art:suffixarray}というデータ構造を用いて高速な文字列
+検索を行なうためのライブラリを中心としたパッケージです。
+
+\sufary を使えば、
+事前にインデクッスを作成しておくことによって、
+grep のような手軽な全文検索を非常に高速に行うことができます。
+また、記事インデックスを作成しておけば、
+記事単位の検索も高速に行えます。
+
+\sufary
+で文字列検索を行うためのインデックスは
+array ファイル(suffix array)と呼ばれています。
+この arrayファイルだけでは検索はできません。
+検索対象となるテキストファイルとarrayファイルがそろって、始めて検索が可能になります\footnote{
+  arrayファイルを作成するアプリケーションとしてmkaryを用意しています。}
+。
+記事単位の検索(文字列検索結果をもとに記事を取り出す)
+を高速に行うために用いるインデックスはDocIDファイルと呼ばれています
+\footnote{
+  DocIDファイルを作成するアプリケーションとしてmkdidを用意しています。
+  記事の区切りを表す文字列を指定して、DocIDファイルを作成します。}
+。
+DocIDファイルには記事の開始位置などの情報が入っています。
+DocIDファイルが無くても記事単位の検索は可能ですが、検索速度は遅くなり
+ます。
+
+
+\sufary の得手不得手は以下の通りです。
+
+\begin{description}
+\item[得意なこと] ~\\
+  辞書・住所録・新聞一年分データなどの、巨大な単一ファイルに対する高
+  速文字列検索。 
+\item[苦手なこと] ~\\
+  電子メールのような多数のファイルに対する検索。 
+  WWWページ検索などのファイルが手元にない状態での検索。 
+\end{description}
+
+\sufary ライブラリは、
+自作プログラムの検索部分などに高速検索機能を手軽に組み込めるように設計
+されています。
+また、Perlモジュールも用意されていますので、
+CGI等での検索システムの構築も容易です。
+標準アプリケーションとして簡単な検索プログラム \verb+sass+ と
+対話型本格的検索プログラム \verb+array+ を用意しました。
+\verb+array+ にはTcl/Tk\cite{book:tcltkj}によるGUIもあります\footnote{
+  \sufary version 1.0\cite{man:sufary1}から
+  2.0 への変更点はかなりあります(特に{\tt array}のコマンドなど)。
+  大きな変更は、ライブラリの整備、アプリケーションの追加、
+  複数ファイル対応、near検索機能などです。ご注意下さい。
+}。
+
+
+第\ref{チュートリアル}章では、
+\sufary のチュートリアルということで
+一通りの使い方について解説します。
+
+suffix array による検索のしくみについては、
+第\ref{しくみ}章で詳しく解説します。他の検索手法との比較も行います。
+
+第\ref{sec:array}章では検索のためのインデックスである
+ array ファイルの構造と応用について、
+第\ref{sec:DocID}章ではテキスト領域(記事)検索のために必要な
+DocID ファイルの構造と応用について解説します。
+
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{使ってみよう ---チュートリアル---}\label{チュートリアル}
+
+ここでは、array ファイルの作り方、
+文字列検索のやり方、
+DocIDファイルの作り方、
+記事単位検索ののやり方について、
+実例を用いて一通り解説します。
+
+\begin{quote}
+  \begin{tabular}{|l||l|l|}\hline
+    検索用ファイル & 使用目的　　　　　　 & 作成用プログラム\\\hline
+    array ファイル & \sufary での検索に必須 & {\tt mkary}     \\
+    DocID ファイル & テキストエリア検索　 & {\tt mkdid}     \\\hline
+  \end{tabular}
+\end{quote}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{部分文字列を検索しよう}
+
+まずは array ファイルを作ってみましょう。
+{\tt mkary} というプログラムを用います。
+
+どういう単位で検索をしたいかという要求によって、作成される array ファ
+イルが違ってきます。
+例えば、文字単位で array ファイルを作ると、そのテキストに含まれる全て
+の部分文字列が検索できます。samp1.txt に対して文字単位で array ファイ
+ルを作ると、 ``YAMASITA'' や ``Tatuo'' はもちろん、
+``ASITA T'' や ``st-na'' といっ
+た、半端な(?)文字列でも見つけることができます。
+\begin{quote}
+  samp1.txt
+  \small
+\begin{verbatim}
+YAMASITA Tatuo
+tatuo-y@cl.aist-nara.ac.jp
+http://cl.aist-nara.ac.jp/~tatuo-y/
+\end{verbatim}
+\end{quote}
+行単位で array ファイルを作ると、各行頭から始まる全ての文字列(prefix 
+といいます)が検索できます。samp1.txt に対して行単位で array ファイルを
+作ると、 ``YAMASITA'', ``YAM'', ``http'' は見つかりますが、
+``aist'' や ``Tatuo'' 
+は行頭から始まる文字列ではないので、見つかりません。行単位の array ファ
+イルは samp2.txt のような辞書の検索に向いています。array ファイルのサ
+イズも文字単位のときよりも小さくなります。
+\begin{quote}
+  samp2.txt
+  \small
+\begin{verbatim}
+fish 魚
+boy 男の子
+girl 女の子
+\end{verbatim}
+\end{quote}
+では、これらのファイルに対して array ファイルを作ってみましょう。
+作られた array ファイルの名前はデフォルトでは
+テキストファイル名 ＋ ``.ary'' になります。
+
+\begin{quote}
+  文字単位で array ファイルを作成
+  \small
+\begin{verbatim}
+% mkary samp1.txt
+Save to "samp1.txt.ary"
+Reading text file "samp1.txt.ary"
+ 
+Sorting...
+Saving...
+Done.
+\end{verbatim}
+
+行単位で array ファイルを作成 ( {\tt -l} オプション )
+  \small
+\begin{verbatim}
+% mkary -l samp2.txt
+Save to "samp2.txt.ary"
+Reading text file "samp2.txt.ary"
+ 
+Sorting...
+Saving...
+Done.
+\end{verbatim}
+\end{quote}
+{\tt mkary} のコマンドラインオプションについてはパッケージ付属の
+「検索用ファイル作成ガイド(MakeIndex.txt)」 をごらん下さい。
+
+検索結果を行単位で表示する簡単な検索プログラム {\tt sass}
+を使って検索してみましょう。
+\begin{quote}
+  簡単な検索の例
+  \small
+\begin{verbatim}
+% sass 'nara' samp1.txt
+15:16:tatuo-y@cl.aist-nara.ac.jp
+42:15:http://cl.aist-nara.ac.jp/~tatuo-y/
+% sass 'Tatuo' samp1.txt
+0:9:YAMASITA Tatuo
+% sass 'girl' samp2.txt
+19:0:girl 女の子
+% sass 'boy' samp2.txt
+8:0:boy 男の子
+\end{verbatim}
+\end{quote}
+\verb+sass+ 以外にも検索アプリケーションとして、
+対話型の {\tt array} や
+Tcl/Tk\cite{book:tcltkj} ベースの {\tt kwicview} などがあります。
+詳しくは「付属アプリケーション利用ガイド(Tool.txt)」をごらん下さい。
+また、C ライブラリや Perl モジュールも用意してあります。
+これらについては「ReferenceC.txt」「ReferenceP.txt」をごらん下さい。
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{記事単位で検索しよう}
+
+さて、
+samp3.txt のような複数の記事({\tt <ARTICLE>}タグと{\tt </ARTICLE>}タグ
+で囲まれてい
+るテキストエリア)が含まれるテキストがあるとします。「文字列『自然言語処理』
+を含む記事を見つけて取り出す」という検索を行うことを考えます。
+\begin{quote}
+  samp3.txt
+  \small
+\begin{verbatim}
+<ARTICLE>
+形態素システム『茶筌』は２０世紀末に奈良先端大で開発された・・・（略）
+・・・フリーソフトとして公開・・・（略）・・・
+</ARTICLE>
+<ARTICLE>
+２１世紀初頭の自然言語処理システム開発への過剰な投資により、粗悪製品が
+乱造され・・・（略）・・・若者の自然言語処理ばなれが深刻・・・（略）・
+・・結局我々人間は歴史から何も学んでいないということを実感させられる。
+</ARTICLE>
+\end{verbatim}
+\end{quote}
+「自然言語処理」という文字列がどこにあるかは、array ファイルがあれば見
+つけることができますが、それがどの記事に含まれているかということは、
+array ファイルだけでは簡単には分かりません。そこで、SUFARY では DocID 
+ファイルというファイルを利用します。DocID ファイルには記事の開始タグと
+終了タグ(この場合は{\tt <ARTICLE></ARTICLE>})の位置データが格納されていて、
+これによりテキストエリア検索が効率的に行えます。
+詳しいことは、第\ref{sec:DocID}章を御参照下さい。
+
+ではさっそく DocID ファイルを作ってみましょう。
+DocID ファイルを作るプログラムは {\tt mkdid} です。
+まず、なにはともあれ、array ファイルが必要なので、{\tt mkary} で作ります。
+\begin{quote}
+  \small
+\begin{verbatim}
+% mkary samp3.txt
+Save to "samp3.txt.ary"
+Reading text file "samp3.txt"
+
+Sorting...
+Saving...
+Done.
+\end{verbatim}
+\end{quote}
+検索対象テキスト領域(記事など)を囲むタグを引数に指定して、DocIDファイルを作り
+ます。デフォルトでは DocID ファイルは samp3.txt.did という名前になりま
+す。
+\begin{quote}
+  \small
+\begin{verbatim}
+% mkdid '<ARTICLE>' '</ARTICLE>' samp3.txt
+Number of Documents = 2
+sorting...
+writting...
+done.
+\end{verbatim}
+\end{quote}
+
+しかし、世の中、テキスト領域の始まりだけにしかタグがないというフォーマッ
+トも多いのも事実です。例えば以下のようなテキスト。
+\begin{quote}
+  samp4.txt
+  \small
+\begin{verbatim}
+#ID-001
+形態素システム『茶筌』は２０世紀末に奈良先端大で開発された・・・（略）
+・・・フリーソフトとして公開・・・（略）・・・
+#ID-002
+２１世紀初頭の自然言語処理システム開発への過剰な投資により、粗悪製品が
+乱造され・・・（略）・・・結局我々人間は歴史から何も学んでいないという
+ことを実感させられる。
+#ID-003
+裏自然言語処理研究会のお知らせ：本日午後３時・・・（略）・・・ふるって
+御参加下さい。
+\end{verbatim}
+\end{quote}
+こんなときは引数にタグを一つだけ指定すればokです。
+\begin{quote}
+  \small
+\begin{verbatim}
+% mkdid '#ID-' samp4.txt
+Number of Documents = 3
+sorting...
+writting...
+done.
+\end{verbatim}
+\end{quote}
+
+テキストエリア検索を行う簡単なプログラム af を使って
+検索してみましょう。
+\begin{quote}
+  検索の例
+  \small
+\begin{verbatim}
+% af '自然言語処理' samp3.txt samp3.txt.did
+FOUND 1
+<ARTICLE>
+２１世紀初頭の自然言語処理システム開発への過剰な投資により、粗悪製品が
+乱造され・・・（略）・・・若者の自然言語処理ばなれが深刻・・・（略）・
+・・結局我々人間は歴史から何も学んでいないということを実感させられる。
+</ARTICLE>
+\end{verbatim}
+\end{quote}
+
+
+
+以上、基本的な使い方を手早く説明してみました。
+詳しいことは、詳細ドキュメントや後の章をごらん下さい。
+
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{検索のしくみ}\label{しくみ}
+
+\sufary では suffix array というデータ構造を用いて高速文字列検索を
+実現しています。
+本章では、その suffix array による検索手法とその特徴を説明し、
+比較のために suffix array 以外の検索手法についても簡単に解説
+します。
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{suffix array について}
+
+当り前の話で恐縮ですが、
+本からある単語を探すには、巻末の索引を用いると便利です。
+辞書順(50音順、アルファベット順)に並んでいるので、
+簡単にお目当ての単語を見つけることができますし、
+指定されたページへ飛べば用は足ります。
+suffix array\cite{art:suffixarray}は、
+電子化テキストに対してこの索引のような働きをするデータ構造です。
+ページの代わりにテキスト中の何文字目かを表す数字を用いています。
+しかし、本の索引のような見出しは無く、それだけでは単なる数字の羅列です。
+ページ番号だけの索引と思って頂ければ結構です。
+そんなもので検索ができるのかと疑われるかも知れませんが、
+それができるのです。後程、解説します。
+
+\begin{figure}[bt]
+  \begin{center}
+%    \Large
+    \leavevmode
+    \renewcommand{\arraystretch}{0.0}
+
+    \begin{tabular}{|c|l|}\hline
+%─│┌┐┘└├┬┤┴┼━┃┏┓┛┗┣┳┫┻╋┠┯┨┷┿┝┰┥┸╂
+┏━┳━┳━┳━┳━┳━┳━┓　　　&\\
+┃さ┃く┃さ┃く┃さ┃く┃ら┃　　　& SUFFIX\\
+┗━┻━┻━┻━┻━┻━┻━┛　　　& \\\cline{2-2}
+　↑　↑　↑　↑　↑　↑　↑　┏━┓&\\
+　└─┼─┼─┼─┼─┼─┼─┨１┃ & さくさくさくら\\
+　　　│　│　│　│　│　│　┣━┫&\\
+　　　└─┼─┼─┼─┼─┼─┨２┃ & くさくさくら\\
+　　　　　│　│　│　│　│　┣━┫&\\
+　　　　　└─┼─┼─┼─┼─┨３┃ & さくさくら\\
+　　　　　　　│　│　│　│　┣━┫&\\
+　　　　　　　└─┼─┼─┼─┨４┃ & くさくら\\
+　　　　　　　　　│　│　│　┣━┫&\\
+　　　　　　　　　└─┼─┼─┨５┃ & さくら\\
+　　　　　　　　　　　│　│　┣━┫&\\
+　　　　　　　　　　　└─┼─┨６┃ & くら\\
+　　　　　　　　　　　　　│　┣━┫&\\
+　　　　　　　　　　　　　└─┨７┃ & ら\\
+　　　　　　　　　　　　　　　┗━┛&\\
+\hline
+    \end{tabular}
+
+{
+  \Large
+  $\Downarrow$\\
+  \fbox{ suffix を辞書順でソート }\\
+  $\Downarrow$\\
+  }
+
+    \begin{tabular}{|c|l|}\hline
+%─│┌┐┘└├┬┤┴┼━┃┏┓┛┗┣┳┫┻╋┠┯┨┷┿┝┰┥┸╂
+┏━┳━┳━┳━┳━┳━┳━┓　　　&\\
+┃さ┃く┃さ┃く┃さ┃く┃ら┃　　　& SUFFIX\\
+┗━┻━┻━┻━┻━┻━┻━┛　　　& \\\cline{2-2}
+　↑　↑　↑　↑　↑　↑　↑　┏━┓&\\
+　│　└─┼─┼─┼─┼─┼─┨２┃ & くさくさくら\\
+　│　　　│　│　│　│　│　┣━┫&\\
+　│　　　│　└─┼─┼─┼─┨４┃ & くさくら\\
+　│　　　│　　　│　│　│　┣━┫&\\
+　│　　　│　　　│　└─┼─┨６┃ & くら\\
+　│　　　│　　　│　　　│　┣━┫&\\
+　└───┼───┼───┼─┨１┃ & さくさくさくら\\
+　　　　　│　　　│　　　│　┣━┫&\\
+　　　　　└───┼───┼─┨３┃ & さくさくら\\
+　　　　　　　　　│　　　│　┣━┫&\\
+　　　　　　　　　└───┼─┨５┃ & さくら\\
+　　　　　　　　　　　　　│　┣━┫&\\
+　　　　　　　　　　　　　└─┨７┃ & ら\\
+　　　　　　　　　　　　　　　┗━┛&\\
+\hline
+    \end{tabular}
+
+{ \Large
+  $\Downarrow$\\
+  suffix array\\
+  \renewcommand{\arraystretch}{1.0}
+  \begin{tabular}{|c|c|c|c|c|c|c|} \hline
+    2 & 4 & 6 & 1 & 3 & 5 & 7\\\hline
+  \end{tabular}
+  }
+  
+  \end{center}
+  \caption{suffix array の作り方}
+  \label{fig:tukurikata}
+\end{figure}
+
+さて、suffix array の仕組みについて解説します。
+suffix とは、ある位置から始まってテキストの終わりまで続く文字列を表すものだと考
+えて下さい。
+%例えば、「\verb+I_am_a_pen.+」というテキストの6文字目の位置の suffix 
+%は「\verb+a_pen.+」になります。10文字目だと「\verb+n.+」になります。
+この suffix の始まりの位置を表す数字を
+suffix 番号 (あるいは、単に「番号」)と呼ぶことにします。
+「さくさくさくら」というテキストを例に
+テキストと suffix 番号の関係を下の図に示します。
+例えば、
+suffix 番号 3のsuffixは「さくさくら」、
+suffix 番号 6のsuffixは「くら」となります。
+\begin{quote}
+\begin{tabular}{l|c|c|c|c|c|c|c|}\cline{2-8}
+  テキスト & さ & く & さ& く&さ&く&ら \\ \cline{2-8}
+  suffix 番号 & 1&2&3&4&5&6&7\\ \cline{2-8}
+\end{tabular}
+\end{quote}
+suffix arrayというのは、このsuffixを表す番号の配列です。
+これらの番号は「番号が指すsuffixを辞書順にソートした結果」
+に基づいて順番に格納されています
+\footnote{
+  文献\cite{book:string}の suffix array の定義を引用しておきます。
+  \begin{quote}
+    \noindent{\bf Definition} \quad
+    Giving an {\em m}-character string {\em T}, a {\em suffix array} for
+    {\em T}, called {\em Pos}, is an array of the integers in the range
+    1 to {\em m}, specifying the lexicographic order of the {\em m}
+    suffixes of string {\em T}.
+  \end{quote}
+}
+。
+言葉だけでは分かりづらいと思うので図\ref{fig:tukurikata}を御覧下さい。
+suffix「くさくさくら」は他のsuffixと比べると、辞書順では一番先頭になります。
+ゆえに、suffix arrayの先頭には「くさくさくら」の
+ suffix 番号 2 が格納されます。
+また、suffix「くさくら」は辞書順では先頭から2番目で、suffix 番号は4なので、
+suffix array の2番目に4が格納されます。
+
+
+このようにして作成された suffix array を用い、
+二分探索(binary search)で文字列検索を行ないます。
+例えば、
+図\ref{fig:tukurikata}で作成された suffix array を用いて、
+「くら」という文字列をキーワードとして検索してみます。
+二分探索では検索範囲の真中の要素とキーワードを比較して検索範囲を狭めて
+行きます。
+図\ref{fig:bsearch}に検索の過程を示しました。
+まず、suffix arrayの真中である suffix 番号 1 に対応する suffix「さくさくさ
+くら」とキーワード「くら」を比較します
+(図\ref{fig:bsearch}(1))。
+辞書順で考えると「くら」が小さいので、suffix arrayの真中より前半分
+に検索対象が絞られます
+(図\ref{fig:bsearch}(2))。
+次は前半分の中心 suffix 番号 4 の suffix とキーワードを比較します。
+今度は「くら」の方が大きいので後半分に検索対象が絞られます
+(図\ref{fig:bsearch}(3))。
+このように毎回検索範囲を半分に狭めていきます。
+この場合は suffix 番号 6 のsuffixが最終的な検索結果となります。
+
+\begin{figure}
+  \begin{center}
+    \leavevmode
+    \renewcommand{\arraystretch}{0.0}
+    \begin{tabular}{|l|lll|}\hline
+%─│┌┐┘└├┬┤┴┼━┃┏┓┛┗┣┳┫┻╋┠┯┨┷┿┝┰┥┸╂
+     　       &   &   &   \\
+     　       &　1 &　2  &　3 \\
+     　       &   &   &   \\\hline
+              &┏━┓  &┏━┓&      \\
+くさくさくら  &┃２┃{\bf く}&┃２┃くさ&      \\
+              &┣━┫  &┣━┫    &      \\
+くさくら      &┃４┃{\bf く}&★４┃くさ&      \\
+              &┣━┫  &┣━┫    &┏━┓\\
+くら          &┃６┃{\bf く}&┃６┃{\bf くら}&★６┃\\
+              &┣━┫  &┗━┛    &┗━┛\\
+さくさくさくら&★１┃さ&          &      \\
+              &┣━┫&      &      \\
+さくさくら    &┃３┃&      &      \\
+              &┣━┫&      &      \\
+さくら        &┃５┃&      &      \\
+              &┣━┫&      &      \\
+ら            &┃７┃&      &      \\
+              &┗━┛&      &      \\
+\hline
+    \end{tabular}
+    \smallskip
+
+    検索キーワード＝「くら」
+  \end{center}
+  \caption{suffix array を用いた検索}
+ \label{fig:bsearch} 
+\end{figure}
+
+
+当然のことながら検索結果が複数になることがあります。
+例えばキーワード「さく」での検索結果は suffix 番号 1 と 3 と 5 です。
+このように、
+検索結果が複数になるときは検索結果は suffix array 上で連続
+(連接)していることが分かります(1, 3, 5 は suffix array の4番目
+から6番目)\footnote{まあ、辞書順ですから当り前のことなんですけど。}。
+というわけで{\sf SUFARY}内部では「suffix array の範囲」を検索結果とし
+て扱っています。
+「さく」の検索結果は「4〜6」といった感じです。
+%\footnote{
+%  これは、\sufary ライブラリを使ってプログラミング
+%  を行なう際に重要となる概念です。プログラミングをしない
+%  人は気にしないで下さい。
+%}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{他の検索手法との比較}
+
+高速全文検索の様々な手法については
+文献\cite{kiji:高速全文検索}で分かり易く解説されていますが、
+ここでは{\sf SUFARY}との比較のために
+suffix array 以外の検索手法についても簡単に解説しておきます。
+
+様々な文字列検索手法を索引(インデックス)という観点から
+分類してみました。
+
+\begin{itemize}
+\item インデックスを利用しないもの \dotfill
+  grep、Perlのパターンマッチングなど
+\item インデックスを利用するもの
+  \begin{itemize}
+  \item テキストファイルが不要なもの \dotfill 
+    部分列インデックス、シグネチャ など
+  \item テキストファイルが必要なもの \dotfill
+    パトリシア木、suffix array など
+  \end{itemize}
+\end{itemize}
+
+%%%%%%%%%%%%
+\subsubsection{インデックスを利用しない検索}
+
+インデックスを利用しない検索は基本的に
+キーワードマッチングをテキストの最初から最後まで位置をずらしながら行ないます。
+一回に一文字ずつずらしながらマッチングを行なうのは大変なので、
+いかに大きく位置をずらすかというのが工夫のしどころです。
+様々なアルゴリズム(KMP, BM など)が考案されていますが\cite{book:algo}、
+結局、テキストファイルの大きさに比例した時間がかかってしまうので、
+検索対象が大規模なデータの場合は不向きです。
+
+grep や Perl\cite{book:Perl} の文字列検索がこれに当ります。
+
+%%%%%%%%%%%%
+\subsubsection{転置インデックス}
+
+インデックスを利用しない検索に対してインデックスを利用する検索は、
+インデックスの作成に時間がかかるものの、
+検索速度はテキストファイルの大きさに比例しないので
+高速な検索が行なえます。
+代表的なものは、本などの巻末の索引です。
+この「本の索引」をコンピュータ上で素直に再現したのが、
+{\bf 転置インデックス}\footnote{
+  いろんな呼び方・方法がありますが、やっていることはだいたい同じです。
+}などと呼ばれる手法です。
+図\ref{fig:ii}のように、
+文字列や単語を見出しとして、いわゆる「本の索引」(インデックスファイ
+ル)を作ります。
+インデックスファイルには見出しとページ番号のかわりの文書番号などが保存され
+ています。
+
+検索は簡単です。
+\begin{description}
+\item[例1]
+
+  図\ref{fig:ii}の単語インデックス(右の表)を用いた
+  検索の例を図\ref{fig:iisearch}にあげておきます。
+  「奈良」と「大学院」が含まれる文書を検索しています。
+  この例では、文書を探すだけなので文字位置情報は利用していません。
+  「奈良」は文書1,2 に「大学院」は文書1 に含まれることが
+  インデックスから分かるので、
+  両方含まれる文書(検索結果)は 文書1となります。
+
+\item[例2]
+
+  文字位置情報を用いた例として、
+  図\ref{fig:ii}の二文字インデックス(真中の表)だけを用いて、
+  キーワード「奈良先端」を検索してみます。
+  キーワードを二文字ずつ「奈良」「良先」「先端」に分解して、
+  それぞれを表から探します。
+  すると、文書1には (文書内での出現位置情報より)
+  3つ全てが並んで出現しているのがわかり、
+  検索結果は文書1ということになります。
+  %文書3は「奈良」だけなので、検索結果にはなりえません。
+
+\end{description}
+
+
+\begin{figure}[tbp]
+  \centering
+  \begin{tabular}{|l||c|c|c|c|c|c|c|c|c|c|c|}\hline
+              & … & 11&12&13&14&15&16&17&18&19& …\\\hline\hline
+    文書 No.1 & … & 奈&良&先&端&技&術&大&学&院& …\\\hline
+    文書 No.2 & … & 日&本&人&と&は&何&な&の&か& …\\\hline
+    文書 No.3 & … & 奈&良&の&午&後&の&天&気&は& …\\\hline
+  \end{tabular}
+
+  {\Huge $\Downarrow$ }
+
+  \begin{tabular}{ccc}
+    1-gram (一文字) & bigram(二文字) & 単語 \\
+  \begin{tabular}{|c|l|}\hline
+    奈 & (1:11) (3:11) ...\\\hline
+    の & (2:18) (3:13) (3:16) ...\\\hline
+    は & (2:15) (3:19) ...\\\hline
+    ら & (3:18) ...\\\hline
+    $\vdots$ &    $\vdots$ \\
+  \end{tabular}
+  &
+  \begin{tabular}{|c|l|}\hline
+    奈良 & (1:11) (3:11) ...\\\hline
+    良先 & (1:12) ...\\\hline
+    先端 & (1:13) ...\\\hline
+    は何 & (2:15) ...\\\hline
+    $\vdots$ &    $\vdots$ \\
+  \end{tabular}
+  &
+  \begin{tabular}{|l|l|}\hline
+    先端科学 & (1:13) ...\\\hline
+    日本人 & (2:11) ...\\\hline
+    大学院 & (1:17) ...\\\hline
+    奈良 & (1:11) (3:11) ...\\\hline
+    $\vdots$ &    $\vdots$ \\
+  \end{tabular}
+  \end{tabular}
+
+  ~\\
+  数字は文書番号と文書内での出現位置
+  \caption{索引の素直な作り方}
+  \label{fig:ii}
+\end{figure}
+
+
+
+\begin{figure}[tbp]
+  \centering
+
+  Query
+
+  \fbox{奈良 and 大学院}
+
+  {\Huge $\Downarrow$ }
+
+  Searching
+
+  \begin{tabular}{|l|}\hline
+    大学院 → \underline{(1)}\\\hline
+    奈良　 → \underline{(1)} (3)\\\hline
+  \end{tabular}
+  
+  {\Huge $\Downarrow$ }
+
+  Found!
+
+  \begin{tabular}{|l|c|}\hline
+    文書 No.1 & … 奈良先端技術大学院 …\\\hline
+  \end{tabular}
+
+  \caption{転置インデックスによる検索の例}
+  \label{fig:iisearch}
+\end{figure}
+
+
+
+
+suffix array では、
+「『本の索引』の見出しの部分の文字列は、
+本文にもまったく同じ文字列があるんだから無駄だ。」
+という倹約思想に基づいます。
+おかげでインデックスファイルが簡略化でき{\bf 資源の節約}になります。
+しかし、検索の際にテキストファイル(本文)をいちいち参照しなければなりません。
+索引だけで検索ができる前述の方法とは本質的に異なります。
+WWW検索(キーワードによるホームページの検索)などでは、
+検索対象データ(つまり、あらゆる場所にあるWWWページデータ)を手元に持たない場合が多いので、
+部分列インデックスがよく使われます。
+suffix array はこのような用途には向いていません。
+WWW上で利用するのならば、同じサイトにあるデータの検索などに限定されます。
+
+
+%%%%%%%%%%%%
+\subsubsection{木}
+
+木構造(トライ)でインデックスデータを構成する方法もあります。
+図\ref{fig:tree}に例を示します。
+検索対象テキスト BABAC の全ての suffix で作成されたトライです
+(suffix tree[\cite{book:string}] と呼ばれています)。
+終端ノードにはテキストへのインデックスが格納されています。
+非常に高速にキーワード検索が行なえます。
+しかし、
+大規模なテキストに対してはインデックスデータが巨大になり、
+あまり実用的ではありません。
+パトリシア木\cite{book:algo}は、このトライを圧縮した構造で、
+テキストファイルを参照することにより、資源を節約しています\footnote{
+  検索に用いるキーワードの長さを制限すれば、
+  必ずしもテキストファイルが必要というわけではないのですが、
+  あらゆる長さの部分文字列を検索できるようにするためにはインデックスデー
+  タが莫大になり過ぎるので、やはりテキストファイルを参照するようにするのが現実
+  的です。
+}。
+suffix array の倹約ぶりにはかないませんが、
+suffix array の二分探索よりも高速であることは確かです。
+図\ref{fig:patricia}にパトリシアの例を示します。
+内部ノードには、比較を行う文字位置を記憶しておきます。
+この比較位置に従い、散発的に文字列比較を行うだけで済むので、
+終端ノードへ速くたどりつけるのです\footnote{
+  ただし、正確を期すためには、最終的に suffix とキーワードの文字列比較
+  をする必要があるます。
+}
+。
+
+なお、suffix array で疑似的なトライを構成することもできます\cite{art:sa}。
+
+
+\begin{figure}[htbp]
+  \begin{center}
+    \begin{tabular}{cc}
+      \renewcommand{\arraystretch}{0.1}
+      \begin{tabular}{l}
+　　┌───┼──┐\\
+　Ａ│　　Ｂ│　Ｃ│\\
+　　●　　　●　　５\\
+　┌┴┐　　│　　　\\
+Ｂ│　│Ｃ　│Ａ　　\\
+　●　４　　●　　　\\
+　│　　　┌┴┐　　\\
+Ａ│　　Ｂ│　│Ｃ　\\
+　●　　　●　３　　\\
+　│　　　│　　　　\\
+Ｃ│　　Ａ│　　　　\\
+　２　　　●　　　　\\
+　　　　　│　　　　\\
+　　　　Ｃ│　　　　\\
+　　　　　１　　　　\\
+\end{tabular}
+&
+\begin{tabular}{|l|c|c|c|c|c|}\hline
+  テキスト &B&A&B&A&C\\\hline
+  インデックス&1&2&3&4&5\\\hline
+\end{tabular}
+\\
+\end{tabular}
+
+\end{center}
+\caption{トライ}
+\label{fig:tree}
+\end{figure}
+
+
+
+\begin{figure}[htbp]
+  \begin{center}
+    \begin{tabular}{cc}
+      \renewcommand{\arraystretch}{0.1}
+      \begin{tabular}{l}
+　　　　　　　　　　　　　　│\\
+　　　　　１文字目を比較─→●　　　\\
+　　　　　　┌───────┼──┐\\
+　　　　　Ａ│　　　　　　Ｂ│　Ｃ│\\
+２文字目─→●　３文字目─→●　　５\\
+　　　　　┌┴┐　　　　　┌┴┐　　\\
+　　　　Ｂ│　│Ｃ　　　Ｂ│　│Ｃ　\\
+　　　　　２　４　　　　　１　３　　\\
+\end{tabular}
+&
+\begin{tabular}{|l|c|c|c|c|c|}\hline
+  テキスト &B&A&B&A&C\\\hline
+  インデックス&1&2&3&4&5\\\hline
+\end{tabular}
+\\
+\end{tabular}
+
+\end{center}
+\caption{パトリシア}
+\label{fig:patricia}
+\end{figure}
+
+
+%%%%%%%%%%%%
+\subsubsection{まとめ}
+
+
+全ての部分文字列(あらかじめ決められたものではない{\bf 任意の文字列})
+に対して検索ができるという条件で、
+様々な検索手法を比較してみます
+(転置インデックスは様々な実装方法があるので、簡単には比較できません)
+。
+
+\begin{center}
+\begin{tabular}{|l||c|c|}\hline
+  検索方法 & インデックスファイル & 検索速度\\\hline
+  インデックスを作らない & いらない & 超遅い \\
+  suffix array & 小さい & 速い \\
+  トライ & 大きい & suffix array より速い \\
+  転置インデックス & ? & ? \\
+  \hline
+\end{tabular}
+\end{center}
+
+
+suffix array やトライはキーワード(あらかじめ決められたもの
+ではない任意の文字列)のテキスト中での出現位置を調べたりする厳密な文字
+列検索に有用です。
+しかし、
+転置インデックスは任意の文字列を確実に高速に検索するのには向いていません。
+とはいうものの日常の検索では、
+あらゆる文字列を検索する必要はほとんどないかもしれません。
+「東海道新幹線」で検索する人はいても、
+「道新幹」で検索する人はあまりいませんよね。
+結局、厳密さ、速度、インデックスのサイズのトレードオフになります。
+
+\sufary で
+suffix array を選択した理由は\footnote{
+  suffix array を選択したから \sufary なんじゃないの、などという
+  つっこみはなしね。
+}、
+インデックスファイルも小さいし検索もそこそこ速く、
+コストパフォーマンスも申し分ないし、
+なによりインデックスの構造がシンプルだからです。
+%ディスク容量が不足気味の環境にお薦めです。
+
+\bigskip
+
+\fbox{
+  \begin{minipage}{.90\textwidth}
+
+    {\bf ★{\sf SUFARY}の使われ方}
+
+    当研究室は「自然言語処理学講座」ということもあって、
+    「日本語の形態素解析(文を名詞とか動詞とかに分割する処理)のための
+    辞書検索」や
+    「大規模なテキストデータから得た統計情報を用いて日本語解析を行なう際の
+    統計情報の検索」などに利用されています。
+    このような大規模な外部データはいちいちプログラム内部に格納して使用
+    するより、{\sf SUFARY}を使った方が簡単で効率的です。
+    辞書検索的な使い方が多いですが、
+    数百メガ規模の新聞テキストからの言葉の使用例の検索、
+    ローカルニュースの検索、蔵書/論文の検索などテキスト検索にも利用さ
+    れています。
+
+    辞書検索と言えば、部分列インデックス方式の検索エンジンなどのインデッ
+    クスファイルは辞書とみなせます。というわけで、他の検索手法による検
+    索エンジンのインデックスファイルの検索なんかに利用したりもしていま
+    す。
+  \end{minipage}
+  }
+
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{array ファイル}\label{sec:array}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ファイルの構造}\label{kouzou}
+
+第\ref{はじめに}章で解説した通り、
+suffix array とは
+テキスト中の様々な位置から始まる半無限文字列(suffix)
+の開始位置(を表す数字)からなる配列で、
+それらの suffix を辞書順にソートして作られものです。
+
+文献\cite{art:Church}に非常にすっきりした
+suffix array の作成プログラム(図\ref{fig:sufsort1})が掲載されています
+\footnote{
+%  {\tt mman.h} を include してるのに、mmapを使っていないのは謎ですが。
+  {\tt mman.h} を include する意図が私には分かりませんでした。
+}。
+\sufary の suffix array 作成プログラム {\tt mkary} は
+これを参考に作りました。
+
+\begin{figure}[b]
+  \begin{center}
+    \leavevmode
+     \footnotesize
+\begin{tabular}{|c|c|}
+\begin{minipage}{.45\textwidth}
+\begin{verbatim}
+#include <fcntl.h>
+#include <malloc.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+/* usage: sufsort1 text > text.suf */
+
+char *text;
+
+suffix_compare(int *a, int *b)
+{
+  return strcmp(text + *a, text + *b);
+}
+
+
+
+\end{verbatim}
+\end{minipage}
+ &
+\begin{minipage}{.45\textwidth}
+\begin{verbatim}
+main(int ac, char **av)
+{
+  struct stat stat_buf;
+  int N, i, *suf;
+  FILE *fd = fopen(av[1], "r");
+  fstat(fileno(fd), &stat_buf);
+  N = stat_buf.st_size;
+  text = (char *)malloc(N+1);
+  fread(text, sizeof(char), N, fd);
+  text[N] = 0; /* pad with null */
+  
+  suf = (int *)malloc(N * sizeof(int));
+  for(i=0;i<N;i++) suf[i] = i;
+
+  qsort(suf, N, sizeof(int), suffix_compare);
+  fwrite(suf, N, sizeof(int), stdout);
+}
+\end{verbatim}
+\end{minipage} \\
+\end{tabular}
+
+  \end{center}
+  \caption{sufsort1.c}
+  \label{fig:sufsort1}
+\end{figure}
+
+
+\sufary では、suffix の開始位置を表すのに long int を
+使っています。
+{\tt mkary} で作成される array ファイルの構造は
+単なる long int の配列です。
+それゆえ、必要となるバイト数やバイトオーダーは array ファイルを
+作成した環境に依存することになるので注意が必要です。
+
+array ファイルの中身を覗いてみましょう。
+テキスト「zenzendame」を例として
+array ファイルを作り UNIX の od コマンドで見てみます。
+
+\begin{quote}
+  \small
+\begin{verbatim}
+% echo -n zenzendame > samp_file
+% mkary -q samp_file
+% od -x samp_file.ary
+0000000 0000 0007 0000 0006 0000 0009 0000 0004
+0000020 0000 0001 0000 0008 0000 0005 0000 0002
+0000040 0000 0003 0000 0000
+0000050
+\end{verbatim}
+\end{quote}
+
+実行環境は SunOS 5.5.1 ですので、long int は4バイト、
+バイトオーダーはビッグエンディアン(Big Endian)になっています。
+array ファイルの中身を見てみれば、
+以下のようにきちんとソートされているのが分かります。
+
+\begin{quote}
+\begin{tabular}{|c|l|}\hline
+  位置 & SUFFIX \\\hline\hline
+  7 & ame \\\hline
+  6 & dame \\\hline
+  9 & e \\\hline
+  4 & endame \\\hline
+  1 & enzendame \\\hline
+  8 & me \\\hline
+  5 & ndame \\\hline
+  2 & nzendame \\\hline
+  3 & zendame \\\hline
+  0 & zezendame \\\hline
+\end{tabular}
+\end{quote}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{二段階の処理}
+
+{\tt mkary} は、
+「array ファイルの書き出し」「array ファイルのソート」という二段階の処
+理を行います。
+
+{\tt mkary} のオプション No Sort ({\tt -ns})は、
+「array ファイルの書き出し」処理だけを行いソートを行わないというものです。
+つまり、そのままでは検索に利用できない不完全な array ファイルを作成し
+ます。
+以下の実行例を見れば分かるように、suffix を表す位置情報が順番に並んで
+いるだけです。
+どんな使い道があるのかはあえて明言しません。
+\begin{quote}
+  \small
+\begin{verbatim}
+% mkary -q -ns samp_file
+% od -x samp_file.ary
+0000000 0000 0000 0000 0001 0000 0002 0000 0003
+0000020 0000 0004 0000 0005 0000 0006 0000 0007
+0000040 0000 0008 0000 0009
+0000050
+\end{verbatim}
+\end{quote}
+
+No Sort の双子の兄弟みたいなオプションが Sort Only ({\tt -so})です。
+これは、すでに存在している array ファイルに対して
+「array ファイルのソート」処理のみを行うというものです。
+以下の実行例に示すように、array ファイル({\tt samp\_file.ary})が存在しないと
+ソートのしようがないのでエラーになります。
+No Sort で作成した後なら実行できます。
+結果は普通に実行したときと同じにきちんとソートされます。
+\begin{quote}
+  \small
+\begin{verbatim}
+% echo -n zenzendame > samp_file
+% mkary -q -so samp_file
+ファイル "samp_file.ary" がオープン出来ません。
+% mkary -q -ns samp_file
+% mkary -q -so samp_file
+% od -x samp_file.ary
+0000000 0000 0007 0000 0006 0000 0009 0000 0004
+0000020 0000 0001 0000 0008 0000 0005 0000 0002
+0000040 0000 0003 0000 0000
+0000050
+\end{verbatim}
+\end{quote}
+
+Sort Only 機能にはいろいろな使い道があります。
+まず一つ目はインデックスの追加です。
+テキストファイルの末尾に新たなテキストを追加する場合、
+もういちど最初から array ファイルを作り直すのが普通です。
+しかし、テキストファイルが巨大な場合、作り直す時間をなるべく
+短縮したいものです。
+「array ファイルの書き出し」「array ファイルのソート」という二段階の処
+理を行います。
+そのような場合はテキストファイルにテキストを追加するだけでなく、
+array ファイルにも位置情報を追加して Sort Only 機能を利用するのが
+現実的です。
+この流れを以下の例でごらん下さい。
+あくまで例なので、テキストファイルは巨大なものではありませんが。
+\begin{quote}
+  \small
+\begin{verbatim}
+% echo -n zenzendame > samp_file
+% mkary -q samp_file
+% echo -n 'jan' >> samp_file   ### テキストファイルへの追加
+% perl -e 'print pack("lll",10,11,12);' >> samp_file.ary   ### array 
+ ファイルへの追加 
+% od -x samp_file.ary   ### 0..0a, 0..0b, 0..0c が末尾に追加された
+0000000 0000 0007 0000 0006 0000 0009 0000 0004
+0000020 0000 0001 0000 0008 0000 0005 0000 0002
+0000040 0000 0003 0000 0000 0000 000a 0000 000b
+0000060 0000 000c
+0000064
+% mkary -q -so samp_file
+% od -x samp_file.ary
+0000000 0000 0007 0000 000b 0000 0006 0000 0009
+0000020 0000 0004 0000 0001 0000 000a 0000 0008
+0000040 0000 000c 0000 0005 0000 0002 0000 0003
+0000060 0000 0000
+0000064
+\end{verbatim}
+\end{quote}
+最終的には以下のようにきちんとソートされているのが分かります。
+\begin{quote}
+\begin{tabular}{|c|l|}\hline
+  位置 & SUFFIX \\\hline\hline
+  7 & amejan \\\hline
+ 11 & an \\\hline
+  6 & damejan \\\hline
+  9 & ejan \\\hline
+  4 & endamejan \\\hline
+  1 & enzendamejan \\\hline
+ 10 & jan \\\hline
+  8 & mejan \\\hline
+ 12 & n \\\hline
+  5 & ndamejan \\\hline
+  2 & nzendamejan \\\hline
+  3 & zendamejan \\\hline
+  0 & zezendamejan \\\hline
+\end{tabular}
+\end{quote}
+
+二つ目は自由なインデキシングです。
+{\tt mkary} ではオプションの指定により
+文字単位({\tt -c})、
+単語単位\footnote{スペース等のデリミタで区切られた単位}({\tt -w})、
+行単位({\tt -l})
+によるインデキシングができます。
+しかし「形態素解析の結果を用いて形態素単位にインデキシングしたい」とか
+「新聞記事のキーワードが列挙されている部分だけでインデキシングしたい」とか
+「辞書データの見出し語の部分だけでインデキシングしたい」など
+様々な要求があります。
+{\tt mkary} でこのようなことを全て可能にするのは非常に大変です\footnote{
+インターフェース設計や実装が面倒臭いという意味です}。
+そこで、まず、これらのインデキシング基準で、
+ソートされていない array ファイルを
+%新規作成するプログラムを
+作り、
+そして、その array ファイルを Sort Only 機能でソートするという手順が
+現実的です。
+この流れを以下の例でごらん下さい。
+母音が現れる位置でインデキシングしています。
+\begin{quote}
+  \small
+\begin{verbatim}
+% echo -n zenzendame > samp_file
+% perl -ne 'while(/(.)/gs){print pack("l",pos()-1) if($1 =~ /[aeiou]/)}'
+ samp_file > samp_file.ary
+% od -x samp_file.ary   ### aeiou が現れる位置の配列
+0000000 0000 0001 0000 0004 0000 0007 0000 0009
+0000020
+% mkary -q -so samp_file
+% od -x samp_file.ary
+0000000 0000 0007 0000 0009 0000 0004 0000 0001
+0000020
+\end{verbatim}
+\end{quote}
+最終的には以下のようにきちんとインデキシングされてソートされているのが分かります。
+\begin{quote}
+\begin{tabular}{|c|l|}\hline
+  位置 & SUFFIX \\\hline\hline
+  7 & ame \\\hline
+  9 & e \\\hline
+  4 & endame \\\hline
+  1 & enzendame \\\hline
+\end{tabular}
+\end{quote}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{分割とマージ}
+
+{\tt mkary}で suffix array を構築(array ファイルをソート)するとき、
+テキストと array がメモリ上にのっていれば非常に望ましい環境です。
+メモリが少いとディスクアクセスが多くおこり非効率的になります。
+ディスクアクセスの回数を押えるために array ファイルを分割し、
+局所的にソートを行い、最後にまとめる(マージ)という方法をとることができ
+ます。
+
+\begin{figure}[b]
+  \begin{center}
+    \leavevmode
+    \small
+    \begin{tabular}{|c|c|cc|}\hline
+      &&&\\
+      \bf (1)  & \bf (2)  & \multicolumn{2}{c|}{\bf (3)} \\
+      3つのブロックに分割 & 各ブロック内でソート & 
+      \multicolumn{2}{c|}{マージ%：各ブロックから最小 suffix を選択していく
+      } \\
+      \tabcolsep=1mm
+      \begin{tabular}{|c|l|}\hline
+        位置 & SUFFIX \\\hline\hline
+        0 & zezendamejan \\\hline
+        1 & enzendamejan \\\hline
+        2 & nzendamejan \\\hline
+        3 & zendamejan \\\hline
+        4 & endamejan \\\hline
+        \hline
+        5 & ndamejan \\\hline
+        6 & damejan \\\hline
+        7 & amejan \\\hline
+        8 & mejan \\\hline
+        9 & ejan \\\hline
+        10 & jan \\\hline
+        \hline
+        11 & an \\\hline
+        12 & n \\\hline
+      \end{tabular}
+      &
+      \tabcolsep=1mm
+      \begin{tabular}{|c|l|}\hline
+        位置 & SUFFIX \\\hline\hline
+        4 & endamejan \\\hline
+        1 & enzendamejan \\\hline
+        2 & nzendamejan \\\hline
+        3 & zendamejan \\\hline
+        0 & zezendamejan \\\hline
+        \hline
+        7 & amejan \\\hline
+        6 & damejan \\\hline
+        9 & ejan \\\hline
+        10 & jan \\\hline
+        5 & ndamejan \\\hline
+        8 & mejan \\\hline
+        \hline
+        11 & an \\\hline
+        12 & n \\\hline
+      \end{tabular}
+      &
+      \tabcolsep=0mm
+      \begin{tabular}{|c|c|c|c|c|c}\hline
+        ☆4&☆4&☆4&☆4&★4&　\\\hline
+        1 & 1& 1& 1&☆1\\\hline
+        2 & 2& 2& 2& 2\\\hline
+        3 & 3& 3& 3& 3\\\hline
+        0 & 0& 0& 0& 0\\\hline
+        \hline
+        ★7 \\\hline
+        6 &☆6&★6\\\hline
+        9 & 9& 9& ★9\\\hline
+        10&10&10&10&☆10\\\hline
+        5 & 5& 5& 5& 5\\\hline
+        8 & 8& 8& 8& 8\\\hline
+        \hline
+        ☆11&★11\\\hline
+        12&12&☆12&☆12&☆12\\\hline
+      \end{tabular}
+      &
+      \tabcolsep=1mm
+      \begin{tabular}{|c|l|}\hline
+        位置 & SUFFIX \\\hline\hline
+        7 & amejan \\\hline
+        11 & an \\\hline
+        6 & damejan \\\hline
+        9 & ejan \\\hline
+        4 & endamejan \\\hline
+        1 & enzendamejan \\\hline
+        10 & jan \\\hline
+        8 & mejan \\\hline
+        12 & n \\\hline
+        5 & ndamejan \\\hline
+        2 & nzendamejan \\\hline
+        3 & zendamejan \\\hline
+        0 & zezendamejan \\\hline
+      \end{tabular}
+      \\
+      &&&\\\hline
+    \end{tabular}
+  \end{center}
+  \caption{分割＆マージの例}
+  \label{fig:3blocks}
+\end{figure}
+
+この方法をとる場合は、{\tt -b} オプション
+で array ファイルの分割数を指定します。
+以下に使用例(5ブロックに分割)を示します。
+\begin{quote}
+  \small
+\begin{verbatim}
+% mkary -b 5 sample
+Save to "sample.ary"
+Reading text file "sample"
+++
+Sorting...
+ BLOCK 1
+ BLOCK 2
+ BLOCK 3
+ BLOCK 4
+ BLOCK 5
+Merging into "sample.ary-"
+Rename "sample.ary-" with "sample.ary"
+Done.
+\end{verbatim}
+\end{quote}
+
+3つのブロックに分割したときの処理の流れを
+図\ref{fig:3blocks}に示します。
+まず、ソート前の array ファイルを3つのブロックに分割します。
+そして、各ブロック内でソートを行います。
+局所的な処理なのでディスクアクセスの回数が押えられます。
+最後に各ブロックの先頭から順番に一つずつ suffix をとりだし、
+それらを比較してその中で辞書順に最小なものを選択して
+別のファイルに出力していきます。
+例えば
+図\ref{fig:3blocks}の(2)では最初に 4, 7, 11 の suffix の中から辞書順で
+最小である 7 が選ばれ別ファイルに出力されます。
+suffix 7 は2つ目のブロックの先頭だったので、
+次の(2つ目のブロックの)先頭 suffix は 6 になります。
+今度は、4, 6, 11 の suffix の中から辞書順で最小である 11 が選ばれ 
+別ファイルに出力されます。
+この次は 4, 6, 12 の中から 6 が、その次は 4, 9, 12 の中から 9 が選択さ
+れます。
+このように3つのブロックを辞書順を保ったままマージします。
+各フェーズで辞書順で最小の suffix を選択するときにはヒープ
+\cite{book:algo}という
+データ構造を用いていますので、
+各選択フェーズの計算時間は $O(\log ブロック数)$ しかかかりません。
+マージ時にはディスクアクセスが多くおこりますが、
+分割せずにソートするよりかは少いので、
+結果的に速度は向上します。
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ソート速度の向上}
+
+文献\cite{art:ito-mksa} に
+suffix array を高速に構築するさまざまな方法が紹介、及び、提案されています。
+単純な Quick Sort ではなく、
+文字列のソート(suffix のソート)に特化した方法をとることで
+高速化が可能になります。
+
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{DocID ファイル}\label{sec:DocID}
+
+suffix array を用いて文字列検索を行うと、 
+その文字列のテキスト中での位置(何文字目)は即座に分かる 
+のだが、 
+それがどのテキスト領域(記事など)に含まれているかを調べるには別の手法が
+必要になる。 
+
+図\ref{fig:didtext}を例に考えてみる。
+array ファイルがあれば、
+「フリーソフト」という文字列が、テキストの630文字目にあるということはすぐ分か
+る。
+しかし、それが「形態素解析システム『茶筌』の歴史」という記事に含まれて
+いるということは 630 という位置情報(suffix 番号)だけでは分からない。 
+
+\begin{figure}[b]
+  \begin{center}
+    \begin{tabular}{|l|l|}\hline
+      位置 (suffix 番号) & テキスト \\ \hline
+      & {\tt ・・・} \\
+      472 : 記事開始位置 & {\tt <DOC><TITLE>形態素解析システム『茶筌』の歴史</TITLE>} \\
+      & {\tt <CONTENT>・・・} \\
+      630 & {\tt フリーソフトとして公開・・・</CONTENT></DOC>} \\
+      790 : 記事終了位置 &  \\
+      790 & {\tt 記事と記事との} \\
+      804 & {\tt 間だよん。} \\
+      814 : 記事開始位置 & {\tt <DOC><TITLE>自然言語処理バブルの崩壊</TITLE>} \\
+      & {\tt <CONTENT>・・・</CONTENT></DOC>} \\
+      1326 : 記事終了位置 &  \\
+      & {\tt ・・・} \\
+      \hline
+    \end{tabular}
+  \end{center}
+  \caption{タグ付けされたテキスト領域を持つテキストの例}
+  \label{fig:didtext}
+\end{figure}
+
+テキスト中の対象となるテキスト領域の開始位置
+と終了位置を交互に昇順に並べた配列(DocID 配列 = DocID ファイル)を利用する。
+図\ref{fig:did}に図\ref{fig:didtext}のテキストを対象にした
+DocID 配列の例を示す。
+文字列検索結果が含まれているテキスト領域を知るには、
+文字列検索結果である suffix 番号を検索キーとして、
+その値を越えない最大の開始位置をその配列から二分探索で探せば良い。 
+
+\begin{figure}[b]
+\begin{center}
+  記事({\tt DOC} タグで囲まれているテキスト領域)の DocID 配列
+
+      \smallskip  
+
+      \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}\hline
+        13& 210&  472&790& 814& 1326&  1406&    1763&   1840& 2199\\\hline
+        開始& 終了&開始&終了& 開始&  終了& 開始&  終了&  開始&  終了\\
+        \hline
+      \end{tabular}
+
+
+      \bigskip
+
+      タイトル({\tt TITLE} タグで囲まれているテキスト領域)の DocID 配列
+
+      \smallskip
+
+      \begin{tabular}{|c|c|c|c|c|c|}\hline
+        ・・・ & 486& 533& 819& 859& ・・・ \\\hline
+        & 開始 &  終了 &  開始 & 終了 & \\\hline
+      \end{tabular}
+  \end{center}
+
+  \caption{DocID 配列の例}
+  \label{fig:did}
+\end{figure}
+
+
+\begin{description}
+\item[例1]
+
+  文字列「フリーソフト」が630文字目にあるとする。 配列を二分探索して
+  630を越えない最大の数字を探すと472。 472は記事の開始位置なので、 
+  求める記事は472 文字目から 790 文字目まで\footnote{
+    DocID の隣の要素を見れば終了位置が分かる
+    }
+  のテキスト領域ということが分かる。
+
+\item[例2]
+
+  文字列「間だよん」が804文字目にあるとする。 配列を二分探索して804を
+  越えない最大の数字を探すと790。 790は記事の終了位置なので、 「間だよ
+  ん」を含む記事はないということが分かる。
+\end{description}
+開始位置と終了位置が交互に現れるという構造なので、開始位置か終了位置
+かは瞬時に判断可である。付加情報は不要。 
+
+%DocID ファイルも array ファイルと同じく単なる long int の配列です。
+%それゆえ、必要となるバイト数やバイトオーダーは環境に依存することになる
+%ので注意が必要です。
+
+この DocID 配列は記事だけでなく階層構造を持つテキストの検索に利用できる。
+例えば、あるキーワードが含まれているタイトル
+({\tt <TITLE>} と {\tt </TITLE>} で囲まれている)を探し、
+その記事(タイトルを含んでいる)を取り出したいという場合、
+図\ref{fig:did}のようなタイトルの DocID 配列も用意すれば良い。
+
+\begin{description}
+\item[例3]
+
+  タイトル({\tt TITLE})に文字列「バブルの崩壊」が含まれる記事({\tt
+    DOC})を探す。
+
+  文字列「バブルの崩壊」が838文字目にあるとする。
+  838を越えない最大の数字を  タイトルの DocID 配列から探すと819。819はタイトルの開始位置な
+  ので、「バブルの崩壊」を含むタイトルは819から始まるということが分か
+  る。
+  このタイトルの開始位置 819 を越えない最大の数字を記事の DocID 配列か
+    ら探すと 814。
+    求める記事は 814 文字目から1326文字目のテキスト領域である。
+
+\end{description}
+
+このように、多階層の構造をもつ文書にたいする様々な階層での検索が可能に
+なる。
+これは嬉しい。XMLとかに応用可能です。 
+その場合は、データディクショナリのような
+テキスト構造やファイル構成を管理する凝った枠組が必要になるでしょう。
+
+DocID 配列は
+{\tt mkdid} によって作成され、
+対象テキストファイル名 ＋ ``.did'' という
+ファイル(DocID ファイル)にセーブされます。
+構造は array ファイルと同様で、単なる long int の配列です。
+UNIX の {\tt od -x} コマンドなどでのぞいてみましょう。
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\sufary の歴史}\label{歴史}
+
+そもそもことの始まりは、
+1996年の春から夏にかけての、
+奈良先端科学技術大学院大学のプロジェクト実習という授業の
+課題「パトリシア木\cite{book:algo}による高速文字列検索プログラムの作成\footnote{正確な題は忘れた。}」であった。
+
+自然言語処理学講座の松本裕治教授が単位認定者、
+当時M2の山下達雄(松本研)が現場監督にあたった。
+当初は、
+松本研内で改良中であった形態素解析器JUMAN(後に「茶筌」となる)の辞書引
+き部分の高速化を目標としていた。
+山下の作成したプロトタイプを元に、
+当時M1の熊谷俊高(????研)、米沢恵司(松本研)が作業にあたった。
+
+その後、このプロジェクトは、
+数百メガバイト規模のテキストデータの高速検索を目指したが、
+パトリシア木のような木構造はデータサイズが膨大になり、
+当時の(現在も?)松本研のマシンでは太刀打ちできないことが判明した。
+そこで、効率的なデータ構造でかつ高速検索の可能な
+suffix array\cite{art:suffixarray}を採用することとなった。
+熊谷が検索、コマンドインターフェースに関する部分を作成し、
+山下がその他の周辺部分の作成、
+および、修正・保守・整理を行なった。
+
+それから、約一年後、1997年6月に、
+suffix arrayを用いた高速文字列検索プログラムは山下により勝手に{\sf SUFARY}と
+命名され暫定版が公開された。
+7月には正式版(Version 1.0)\cite{man:sufary1}
+が公開され、ホームページも開設された。
+
+山下により細々と保守されていた{\sf SUFARY}であるが、
+1997年夏から、松本研M2(当時)今村友明の開発参加により、
+複数ファイル処理、near検索などの機能が追加された。
+また、松本研D2中山拓也(当時)により、Perlモジュールが作成され、
+(松本研内の)様々な研究に利用された。
+
+1998年初夏、検索部分のCライブラリ化が完了し Version 2.0 が公開された。
+
+1998年秋、山下によりテキスト領域(記事など)単位で検索できるよう機能拡張
+された。
+
+(敬称略)
+
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{お知らせ}
+
+{\sf SUFARY}に関する情報は以下のURLを御参照下さい。
+バグやリリースなどの最新情報も入手できます。
+また、{\sf SUFARY}に関する技術情報もときどき提供しています。
+
+\begin{center}
+{\sf http://cl.aist-nara.ac.jp/lab/nlt/ss/}
+\end{center}
+%製作者へのリクエストもできます。
+
+%{\sf SUFARY}そのものを論文等に引用する際には
+%以下のようにしてみたらどうでしょう。
+%でも、まあ、普通は\cite{man:sufary1}みたいにマニュアルを引用するみたい
+%なので、それでもいいですけど。
+
+%\begin{quote}
+%%  奈良先端科学技術大学院大学 自然言語処理学講座. %
+%  NAIST CL-Lab. %
+%  ``{\sf SUFARY} Version 2.0'', %
+%  \verb+<http://cl.aist-nara.ac.jp/lab/nlt/ss/>+ , June 1998.
+%\end{quote}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 参考文献
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{thebibliography}{80}
+  \addcontentsline{toc}{section}{参考文献}
+
+\bibitem{art:suffixarray}
+  Udi Manber, Gene Myers. %
+  ``Suffix Arrays: A New Method for On-line String Searches'', %
+  1st ACM-SIAM Symposium on Discrete Algorithms, pp.319-327, 1990.
+
+  \begin{quote}
+    suffix array の原典。
+  \end{quote}
+
+\bibitem{art:Church}
+  Kenneth W. Church. %
+  ``You shall know a word by the company it keeps'', %
+  NLPRS'95: Natural Language Proceeding Pacific Rim Symposium, 
+  p.22-34, 1995.
+
+%\bibitem{art:Ngram}
+%  Makoto Nagao, Shinsuke Mori. %
+%  ``A New Method of N-gram Statistics for Large Number of n and
+%  Automatic Extraction of Words and Phrases from Large Text Data of
+%  Japanese'', %
+%  COLING-94, pp.611-615, 1994.
+
+\bibitem{book:自然言語処理}
+  長尾真編. %
+  ``自然言語処理'', p.20-23, 岩波書店, 1996.
+
+\bibitem{book:tcltkj}
+  John K. Ousterhout(著), 西山芳幸・石曽根信(訳). %
+  ``Tcl \& Tk ツールキット'',  
+  ソフトバンク株式会社, 1995.
+
+\bibitem{man:sufary1}
+  山下達雄, 熊谷俊高, 米沢恵司, 松本裕治. %
+  ``Suffix Array を用いた高速文字列検索システム {\sf SUFARY} 
+  Version 1.00 取扱説明書'', %
+  {\sf SUFARY}パッケージVersion 1.00付属,   July 1997.
+
+\bibitem{kiji:高速全文検索}
+  道本健二, 真島馨. %
+  ``高速全文検索の威力'', %
+  日経バイト, 1996年10月号.
+
+\bibitem{book:string}
+  Dan Gusfield. %
+  ``Algorithms on Strings, Trees, and Sequences'', %
+  Cambridge Univ. Press, 1997.
+  
+  \begin{quote}
+    DNA配列の検索を目的とした検索アルゴリズムに関する本です。
+    suffix array に関する詳細な解説が載っています。
+    原典より分かりやすいです。
+  \end{quote}
+
+\bibitem{book:IR}
+  Gaston H. Gonnet, Ricardo A. Baeza-Yates, Tim Snider. %
+  ``New Indices for Text: {\sc Pat} Trees and {\sc Pat} Arrays'', %
+  in ``Information Retrieval'', %
+  pp.66-82, Prentice Hall, New Jersey, 1992.
+
+  \begin{quote}
+    OED(Oxford English Dictionary)のコンピュータ編集のために、
+    patricia木\cite{book:algo}から suffix array
+    ({\sc Pat} array)を作成する手法が提案されています。
+    我々も patricia木から suffix array を作成するプログラムを実装して
+    みましたが、
+    大規模なデータに対してはそもそも patricia木が作成できないので
+    (計算機環境の問題)断念しました。
+  \end{quote}
+
+\bibitem{book:algo}
+  Robert Sedgewick(著), 野下浩平・星守・佐藤創・田口東(訳). %
+  ``アルゴリズム (Algorithms)''，% 
+  近代科学社，1992.
+
+  \begin{quote}
+    「原書第2版 第2巻 探索・文字列・計算幾何」の
+    patricia木の解説は非常に分かり易いです。
+  \end{quote}
+
+\bibitem{book:Perl}
+  Larry Wall, Tom Christiansen, Randal L. SchWartz 著, 近藤嘉雪 訳. %
+  ``プログラミング Perl'', %
+  オライリー・ジャパン, November 1998.
+  \quad 原題: ``Programming Perl {\it Second Edition}''
+
+\bibitem{art:sa}
+  山下達雄, 松本裕治. %
+  ``Suffix Array を用いたフルテキスト類似用例検索'', 
+  情報処理学会研究報告 97-NL-121, pp.83-90, September 1997.
+
+\bibitem{art:ito-mksa}
+  伊藤秀夫. %
+  ``大規模テキストに対する Suffix Array の効率的な構築法'', 
+  情報処理学会研究報告 99-NL-129, pp.27-34, January 1999.
+
+\end{thebibliography}
+
+%%%%%%%%%%%%%%%%%%%\newpage
+
+\end{document}
+
+% Local Variables: 
+% mode: japanese-latex
+% TeX-master: t
+% End: 
+

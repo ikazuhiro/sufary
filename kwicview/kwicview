@@ -1,0 +1,496 @@
+#!/usr/local/bin/wish
+#
+# kwicview --- array の GUI
+#
+# いい加減に作ったプログラムなので、かなりぐちゃぐちゃ。
+# そのうちきれいにするつもり。
+
+### SUFARY をインストールしたディレクトリ
+set sufary_path /tmp_mnt/home/tatuo-y/work/sufary/sufary
+###
+
+### 自動読み込み
+lappend auto_path $sufary_path/kwicview
+### array の指定
+set arraybin $sufary_path/array/array
+
+set fs 14
+set fr ""
+set fk ""
+set text_file ""
+
+tk_bisque; # tk3.6 のような色
+option add *highlightThickness 0;
+option add *padY 2; option add *padX 2
+
+# 使用する漢字コード
+kanji defaultInputCode EUC
+kanji defaultOutputCode EUC
+
+set argvl [split $argv " "] ; # 引数!!!!!!!!!!!!
+
+#■  コマンドラインの引数
+set argvl [split $argv " "]
+for {set i 0} {$i < $argc} {incr i} {
+    switch -- [lindex $argvl $i] {
+        -fs {incr i; set fs [lindex $argvl $i];}
+        -fr {incr i; set fr [lindex $argvl $i]; regexp {[0-9]+} $fr fs;}
+        -fk {incr i; set fk [lindex $argvl $i]; regexp {[0-9]+} $fk fs;}
+	-tk3 {tk_bisque;}
+        -f {incr i; set text_file [lindex $argvl $i];}
+        default { # 変な指定
+	    set text_file [lindex $argvl $i];
+	}
+    }
+}
+
+# フォントの設定
+if {$fr != ""} {option add *Font $fr
+} else {
+    option add *Font "-*-*-*-r-*-*-$fs-*-*-*-*-*-iso8859-1"
+}
+if {$fk != ""} {option add *KanjiFont $fk
+} else {
+    option add *KanjiFont  "-*-fixed-*-r-*-*-$fs-*-*-*-*-*-jisx0208.1983-*"
+#    option add *KanjiFont  "-*-mincho-*-r-*-*-$fs-*-*-*-*-*-jisx0208.1983-*"
+}
+
+set f_ary [eval "open {|$arraybin} r+"]
+set gomi [gets $f_ary]
+
+
+set article_output 1; # 1:win or 0:stdout
+set win_ctr 0; # 記事窓の番号
+global idx
+
+set keyword ""
+set found_ctr 0
+set show_from_now 1
+set ihk 20 ; # itidoni_hyoujisuru_kazu 一度に表示する数
+set kwic_width 50
+set keyword_log {"会社[near 40]倒産" "料金[near 40]値上げ" "京都[exact 6]大学" "奈良"}
+set kugiri_str "articles/cl-lab"
+
+set it_average 0
+
+
+bind . <Control-c>  {exit}
+
+###########################################################################
+# タイトルパネル
+###########################################################################
+label .title -background yellow2 -text "KWIC View 2.0"
+pack .title -side top -fill x
+
+###########################################################################
+# ファイルパネル
+###########################################################################
+frame .s
+# 終了
+button .s.quit -text "Quit" -command "destroy ."
+# ファイル名表示 ＆ 変更
+button .s.fo -text "Open" -command ".s.l invoke"
+button .s.l -text $text_file -borderwidth 0 -command {
+    global text_file;
+    set selected_file $text_file;
+    SelectFile .sf "File Open" 1
+    if {$selected_file != ""} {
+	set text_file $selected_file;
+	.s.l conf -text $text_file
+    }
+
+    if {[send2array "file $text_file"] != {}} {
+	.result.hist.mes conf -text \
+	    "ファイルを開くのに失敗しました。これは残念！"
+    }
+}
+# ヘルプ
+button .s.help -text "Help" -command "online_help help/index.html .online_help 1"
+
+# パネルを表示
+pack append .s .s.quit {left padx 5 pady 5}
+pack append .s .s.fo {left padx 5 pady 5}
+pack append .s .s.l {left padx 5 pady 5}
+pack append .s .s.help {right padx 5 pady 5}
+pack .s         -side top -fill x 
+
+
+###########################################################################
+# キーワード入力パネル
+###########################################################################
+frame .i
+button .i.query -text "検索" -command  {
+    send2array init;
+    if {[sufary_search] != 0} {sufary_show 1 $ihk;}
+}
+button .i.aquery -text "追加検索" -command {
+    if {[sufary_search] != 0} {sufary_show 1 $ihk;}
+}
+button .i.clear -text "Clear" -command {.i.in delete 0 end}
+entry .i.in -relief sunken -textvariable keyword
+bind .i.in <Return> ".i.query flash;.i.query invoke"
+focus .i.in
+
+menubutton .i.log -ind 1 -menu .i.log.m -text "LOG"
+menu .i.log.m
+.i.log.m add command -label ""
+
+pack append .i\
+    .i.log {left padx 5 pady 5}\
+    .i.query {left padx 5 pady 5} \
+    .i.aquery {left padx 5 pady 5} \
+    .i.clear {left padx 5 pady 5}\
+    .i.in {fillx padx 5 pady 5}
+pack .i -side top -fill x
+
+###########################################################################
+# 検索結果操作パネル
+###########################################################################
+frame .r
+button .r.all -text "全表示" -command  {
+    sufary_show 1 $found_ctr;
+}
+button .r.show -text "再表示" -command  {
+    if {$found_ctr != 0} {
+	sufary_show $show_from_now [expr $show_from_now+$ihk-1]
+    }
+}
+set ko "個"
+button .r.next -text "次の$ihk$ko" -command  {
+    if {[expr $show_from_now + $ihk] <= $found_ctr} {
+	set show_from_now [expr $show_from_now + $ihk]
+	sufary_show $show_from_now [expr $show_from_now+$ihk-1]
+    }
+}
+button .r.back -text "前の$ihk$ko" -command  {
+    if {[expr $show_from_now - $ihk] >= 1} {
+	set show_from_now [expr $show_from_now - $ihk]
+	sufary_show $show_from_now [expr $show_from_now+$ihk-1]
+    }
+}
+button .r.cen -text "中心揃え" -command {centering_result $it_average}
+
+frame .r.r
+entry .r.r.from -width 6 -textvariable show_from_now
+bind .r.r.from <Return> ".r.show flash; .r.show invoke"
+label .r.r.m1 -text "番目から"
+entry .r.r.num -width 5 -textvariable ihk
+bind .r.r.num <Return> ".r.show flash; nanko; .r.show invoke"
+menubutton .r.r.m2 -ind 1 -menu .r.r.m2.l -text "個"
+menu .r.r.m2.l
+.r.r.m2.l add command -label 20 -command {set ihk 20; .r.show flash; nanko; .r.show invoke;}
+.r.r.m2.l add command -label 30 -command {set ihk 30; .r.show flash; nanko; .r.show invoke;}
+.r.r.m2.l add command -label 50 -command {set ihk 50; .r.show flash; nanko; .r.show invoke;}
+.r.r.m2.l add command -label 100 -command {set ihk 100; .r.show flash; nanko; .r.show invoke;}
+.r.r.m2.l add command -label 200 -command {set ihk 200; .r.show flash; nanko; .r.show invoke;}
+pack append .r.r  .r.r.from left .r.r.m1 left  .r.r.num left  .r.r.m2 left
+
+frame .r.kw
+entry .r.kw.wid -width 3 -textvariable kwic_width
+bind .r.kw.wid <Return> {send2array "kw $kwic_width"; .r.show flash; .r.show invoke;}
+menubutton .r.kw.m -ind 1 -menu .r.kw.m.l -text "KWIC幅"
+menu .r.kw.m.l
+.r.kw.m.l add command -label 50 -command {set kwic_width 50; send2array "kw $kwic_width"; .r.show flash; .r.show invoke;}
+.r.kw.m.l add command -label 100 -command {set kwic_width 100; send2array "kw $kwic_width"; .r.show flash; .r.show invoke;}
+.r.kw.m.l add command -label 300 -command {set kwic_width 300; send2array "kw $kwic_width"; .r.show flash; .r.show invoke;}
+.r.kw.m.l add command -label 500 -command {set kwic_width 500; send2array "kw $kwic_width"; .r.show flash; .r.show invoke;}
+.r.kw.m.l add command -label 999 -command {set kwic_width 999; send2array "kw $kwic_width"; .r.show flash; .r.show invoke;}
+pack append .r.kw .r.kw.m left .r.kw.wid left
+
+frame .r.ks
+label .r.ks.lab -text "区切り"
+entry .r.ks.str1 -width 8 -textvariable kugiri_str
+#bind .r.ks.str <Return> {send2array "kw $kwic_width"}
+
+pack append .r.ks .r.ks.lab left .r.ks.str1 left
+
+pack append .r \
+    .r.r {left padx 5 pady 5} \
+    .r.show {left padx 5 pady 5} \
+    .r.next {left padx 5 pady 5} \
+    .r.back {left padx 5 pady 5}\
+    .r.all {left padx 5 pady 5}\
+    .r.kw {left padx 5 pady 5}\
+    .r.cen {left padx 5 pady 5}\
+    .r.ks {left padx 5 pady 5}
+pack .r -side top -fill x
+
+###########################################################################
+# 検索結果を出力するところ
+###########################################################################
+frame .result -relief sunken -bd 2
+
+frame .result.hist
+
+label .result.hist.mes -text Message -ancho nw
+#label .result.hist.lab -text "Result" -relief raise
+text .result.hist.list -wrap none -width 100 -height 21 -setgrid 1\
+    -yscrollcommand ".result.hist.lscr set" \
+    -xscrollcommand ".result.hist.xscr set"
+scrollbar .result.hist.lscr -orient vertical -command ".result.hist.list yview"
+scrollbar .result.hist.xscr -orient horizontal -command ".result.hist.list xview"
+
+pack .result.hist.mes -fill x
+
+pack .result.hist.lscr -side right -fill y
+pack .result.hist.xscr -side bottom -fill x
+pack .result.hist.list -expand 1 -fill both
+
+pack .result.hist -expand 1 -fill both
+
+pack .result -expand 1 -fill both
+
+
+###########################################################################
+# コマンドを array* に送って結果をもらってくるサブルーチン
+###########################################################################
+proc send2array {cmd} {
+    global f_ary
+    puts $f_ary $cmd
+    flush $f_ary
+    set tmp {}
+    while {1} {
+        set in [gets $f_ary]
+        if {[regexp {^ok} $in]} {break}
+        lappend tmp $in
+    }
+#    puts "COMMAND: $cmd\nRESULT: [join $tmp \n]"
+    return $tmp
+}
+
+###########################################################################
+# SUFARY で検索するぞ
+###########################################################################
+proc sufary_search {} {
+    global found_ctr keyword_log keyword
+
+#    set keyword [.i.in get]
+    if {$keyword == ""} {
+	.result.hist.mes conf -fg red -text \
+	    "検索キーワードがなきゃ、何も見つかりっこありませんよ。"
+	set found_ctr 0
+	return 0
+    }
+
+    # キーワードログの処理
+    lappend keyword_log $keyword
+    kwlog
+
+#    .i.log.m delete end
+#    .i.log.m insert 0 command -label $keyword -command "set keyword $keyword"
+
+    .result.hist.mes conf -fg red -text "検索中・・・"
+    update idletasks
+
+    set rslt [send2array "search $keyword"]
+    if {[regexp {^no matching} [lindex $rslt 0]]} {
+	.result.hist.mes conf -fg red -text "見つかりませんでした。"
+	set found_ctr 0
+	return 0
+    }
+
+    regexp {[0-9]+} $rslt found_ctr           ; # 何個見つかった？
+#    .result.hist.mes conf -text "$found_ctr 個見つかりました。"
+
+    global show_from_now
+    set show_from_now 1
+
+    return $found_ctr ; # 見つかった数を返す
+}
+
+###########################################################################
+# 検索結果を表示するぞ
+###########################################################################
+proc sufary_show {from to} {
+    global keyword found_ctr show_from_now
+
+    .result.hist.mes conf -fg red -text "データ読み込み中・・・"
+    update idletasks
+
+    .result.hist.list delete 1.0 end ; # 表示する場所をきれいにする
+
+    if {$to > $found_ctr} {set to $found_ctr;}
+    if {$from > $found_ctr} {.result.hist.mes conf -text ""; return;}
+#    if {$from < 1} {set from 1; set to 1; set show_from_now 1;}
+    if {$from < 1} {.result.hist.mes conf -text ""; return;}
+#    if {$from < 1} {set from 1; set to 1; set show_from_now 1;}
+
+#    set show_from_now [expr $to + 1]
+    set rslt [send2array "show $from $to"]
+
+    set ctr -1
+    set tag_num 1
+    set it_wa 0
+    foreach ii $rslt {
+	incr ctr
+	if {$ctr == 0} {
+	    .result.hist.mes conf -fg red -text "$ii"
+	    continue;
+	}
+
+	set aa [split $ii \t]
+	set idx [lindex $aa 1]
+	set i [lindex $aa 0]
+
+	# near検索かな？
+	if {[regexp {^(.+) ?\[(near|exact) [0-9]+\] ?(.+)$} $keyword g a b c] == 1} { # near検索だぞ！
+#	    puts "$g $a $b $c\n$i"
+	    set kw_start [kanji string first "<SUFARYKEY>" $i]
+	    regsub -all "<SUFARYKEY>" $i {} i
+	    set kw_pre_end [expr $kw_start+[kanji string length "$a"]]
+	    # 最初のキーワードより後ろの部分
+	    set p [kanji string range $i $kw_pre_end [kanji string length $i]]
+	    set kw_end [expr [kanji string first "$c" $p]+$kw_pre_end+[kanji string length $c]]
+#	    puts "$kw_start $kw_end"
+	} else { # 普通の検索
+	    ## array が出力するSGML風タグの処理
+	    set kw_start [kanji string first "<SUFARYKEY>" $i]
+	    regsub -all "<SUFARYKEY>" $i {} i
+	    set kw_end [kanji string first "</SUFARYKEY>" $i]
+	    regsub -all "</SUFARYKEY>" $i {} i
+	}
+
+	.result.hist.list insert end $i\n
+
+	## 該当文字列(キーワード or キーワードに挟まれた文字列)
+	set it [kanji string range $i $kw_start [expr $kw_end-1]]
+
+	## tkタグ＆バインド
+	.result.hist.list tag add l$tag_num $ctr.$kw_start $ctr.$kw_end
+	.result.hist.list tag configure l$tag_num -background skyblue
+
+	.result.hist.list tag bind l$tag_num <Button-1> "kiji_hyouji $idx $it"
+	.result.hist.list tag bind l$tag_num <Button-3> "line_hyouji $idx"
+	.result.hist.list tag bind l$tag_num <Enter> \
+	    ".result.hist.list tag configure l$tag_num -background yellow"
+	.result.hist.list tag bind l$tag_num <Leave> \
+	    ".result.hist.list tag configure l$tag_num -background skyblue"
+
+	set it_wa [expr $it_wa+[string length $it]]
+
+	incr tag_num
+    }
+
+
+    global ihk it_average ; # 検索結果の中心文字列の平均長
+#    set it_average [expr $it_wa / $ihk]
+    set it_average [expr $it_wa / ($tag_num-1)]
+
+    # 検索結果をＸ軸中心揃えで表示するための処理
+    centering_result $it_average
+
+#    .result.hist.list insert end [expr $ctr+1]
+
+}
+
+
+###########################################################################
+# 検索結果をＸ軸中心揃えで表示するための処理
+###########################################################################
+proc centering_result {keylen} {
+    global kwic_width fs
+
+#    puts  [.result.hist.list cget -width] だめ
+    set chars_in_a_line [expr [winfo width .result.hist.list] / $fs]
+    .result.hist.list xview moveto 0 ; # 左端にもどす(default)
+    .result.hist.list xview scroll \
+	[expr $kwic_width - $chars_in_a_line + ($keylen/2)] unit
+}
+
+###########################################################################
+# 記事を表示する
+###########################################################################
+proc kiji_hyouji {idx em_str} {
+#    global article_output
+#    if {$article_output == 0} {puts [join $tmp \n]; return;}
+
+    global win_ctr
+    incr win_ctr
+    set w .artcle$win_ctr
+    toplevel $w; wm title $w $win_ctr
+
+    set ysize 38
+    frame $w.rst
+    text $w.rst.t1 -width 80 -height $ysize -bd 2 -relief sunken -yscrollcommand "$w.rst.sb set"
+    scrollbar $w.rst.sb -relief sunken -command "$w.rst.t1 yview"
+    button $w.rst.b -width 10 -text Close -command "destroy $w"
+
+    pack $w.rst.b -pady 2 -padx 2 -anchor e
+    pack $w.rst.sb -side right -padx 1 -pady 1 -fill y
+    pack $w.rst.t1 -padx 1 -pady 1 -fill both -expand y
+#    pack $w.rst.sb $w.rst.t1 -side right -padx 1 -pady 1 -fill both -expand y
+    pack $w.rst -fill both -expand y
+
+    global kugiri_str
+    global f_ary
+    puts $f_ary "get $idx $kugiri_str $kugiri_str"
+    flush $f_ary
+
+    set tmp {}
+    set ctr 1
+    while {1} {
+        set in [gets $f_ary]
+        if {[regexp {^ok} $in]} {break}
+	$w.rst.t1 insert end $in\n
+	set start [kanji string first $em_str $in]
+	if {$start >= 0} {
+	    $w.rst.t1 tag add ttt $ctr.$start $ctr.[expr $start+[kanji string length $em_str]]
+	}
+	incr ctr
+    }
+
+    $w.rst.t1 tag configure ttt -background skyblue
+
+}
+
+###########################################################################
+# 行を表示する
+###########################################################################
+proc line_hyouji {idx} {
+    global keyword
+    global f_ary
+    puts $f_ary "line $idx"
+    flush $f_ary
+
+    set tmp {}
+    while {1} {
+        set in [gets $f_ary]
+        if {[regexp {^ok} $in]} {break}
+	append tmp $in
+    }
+    puts $tmp
+}
+
+###########################################################################
+# キーワードログの処理
+###########################################################################
+proc kwlog {} {
+    global keyword_log
+    .i.log.m delete 0 end
+    if {[llength $keyword_log] > 30} {
+	set keyword_log [lrange $keyword_log 1 end]
+    }
+    foreach ll $keyword_log {
+	.i.log.m insert 0 command -label $ll -command "set keyword {$ll}"
+    }
+    .i.log.m add separator
+    .i.log.m add command -label "LOG 消去" -command ".i.log.m delete 0 end; set keyword_log {};"
+}
+
+proc nanko {} {
+    global ihk
+    set ko "個"
+    .r.next conf -text "次の$ihk$ko"
+    .r.back conf -text "前の$ihk$ko"
+}
+
+
+###########################################################################
+###########################################################################
+
+send2array "mode kwic"
+send2array "kw $kwic_width"
+send2array "mojibake ON"
+send2array "file $text_file"
+kwlog
+

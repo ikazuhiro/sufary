@@ -1,0 +1,118 @@
+#!/bin/sh
+
+wish=''
+kvpath=''
+
+cat << 'EOM'
+-----------------------------------------------------------
+                --- kwicview setup ---
+
+このスクリプトは，kwicviewをセットアップするものです．
+mkary, array がコンパイルされている必要があります．
+-----------------------------------------------------------
+EOM
+echo -n "セットアップしますか？ [n]: "
+read ans
+case "$ans" in
+y*)
+	echo "それでは質問です ..."
+	;;
+*)
+	echo "やめときます ..."
+	kill $$
+	;;
+esac
+
+cat << 'EOM'
+-----------------------------------------------------------
+wish (Tcl/Tk)が必要ですが，どこにインストールされてい
+ますか？ フルパス名で答えて下さい．
+-----------------------------------------------------------
+EOM
+while test "$wish" = "" ; do
+	echo -n "? [/usr/local/bin/wish]: "
+	read ans
+	case "$ans" in
+	'')
+		echo "ok."
+		wish=/usr/local/bin/wish
+		;;
+	*)
+		if test -r "$ans"; then
+			echo "了解．"
+			wish=$ans
+		else
+			echo "見付かりません " $wish
+		fi
+		;;
+	esac
+done
+
+
+echo -----------------------------------------------------------
+echo "wish(Tcl/Tk) = $wish"
+echo -----------------------------------------------------------
+
+echo -n "これでよろしいですか？ [y]: "
+read ans
+case "$ans" in
+	n*)
+		echo 中断
+		exit
+		;;
+esac
+
+
+cat << 'EOM'
+-----------------------------------------------------------
+SUFARYのディレクトリをフルパスで指定します．
+-----------------------------------------------------------
+EOM
+here=`pwd | sed 's/\/kwicview$//'`
+while test "$kvpath" = "" ; do
+	echo -n "? [" $here "]: "
+	read ans
+	case "$ans" in
+	'')
+		echo "ok."
+		kvpath=$here
+		;;
+	*)
+		if test -r "$ans"; then
+			echo "了解．"
+			kvpath=$ans
+		else
+			echo "見付かりません " $kvpath
+		fi
+		;;
+	esac
+done
+
+
+echo -----------------------------------------------------------
+echo "dir = $kvpath"
+echo -----------------------------------------------------------
+
+echo -n "これでよろしいですか？ [y]: "
+read ans
+case "$ans" in
+	n*)
+		echo 中断
+		exit
+		;;
+esac
+
+
+
+
+echo "---------------------------------"
+echo "  kwicview を書き換えています．  "
+echo "---------------------------------"
+
+
+cp kwicview kwicview.old
+
+sed 's%^#\!.*$%#\!'$wish'%' kwicview.old | sed 's%^set sufary_path.*%set sufary_path '$kvpath'%' > kwicview
+
+echo 終了しました．
+echo

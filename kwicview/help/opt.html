@@ -1,0 +1,29 @@
+┏━━━━━━━━━┓
+┃実行時のオプション┃
+┗━━━━━━━━━┛
+
+button $w.rst.t1.back -text "もどる" -borderwidth 0 -bg skyblue -command "online_help help/index.html $w";
+$w.rst.t1 window create insert -window $w.rst.t1.back;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    -f FILENAME     ファイル名を指定。ただし、FILENAME.ary が存在してい
+                    なければダメ。
+                    実は -f が無くてもファイル指定できます。
+
+    -fr FONTNAME    フォントを指定(例： -fr  r14 )
+
+    -fk FONTNAME    漢字フォントを指定(例： -fk kanji14 )
+
+    -fs FONTSIZE    フォントを指定する代わりにフォントのサイズを指定します。
+                    プログラム中でそのサイズに該当するフォントを自動的に設定
+                    します。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.back2 -text "もどる" -borderwidth 0 -bg skyblue -command "online_help help/index.html $w";
+$w.rst.t1 window create insert -window $w.rst.t1.back2;
+$w.rst.t1 insert end "\n"; incr line_no;
+END
+
+

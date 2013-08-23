@@ -1,0 +1,228 @@
+Perl Module Reference
+
+中山宅也(takya-n@is.aist-nara.ac.jp)
+高岡一馬(kazuma-t@is.aist-nara.ac.jp)
+last update 2000.07.07
+
+SUFARY(http://cl.aist-nara.ac.jp/lab/nlt/ss/)
+
+
+■ 表記
+ $SUFRAY : SUFARYパッケージを展開したディレクトリ
+
+
+■■■ はじめに
+
+Perl は，ちょっとしたプログラムを書くのには非常に便利な言語です．ただ
+し，大規模なファイルの検索などをするには，処理速度がやや遅いのが気にな
+ります．そこで，SUFARY を Perl から使いたいという要望が出てくるわけで
+すが，SUFARY を Perl から使うには次のような方法があります．
+
+・パイプ処理を用いて，対話型検索プログラム array と通信する．
+・Perl用の SUFARY モジュールを作って，Perl から SUFARY のライ
+  ブラリに直接アクセスできるようにする．
+
+SUFARY パッケージでは後者の方法を採用して，Perlモジュールを同梱してい
+ます．
+
+モジュールを使うには，次の記述をスクリプトの先頭付近に加えます．もちろ
+ん，インストールガイド(README)に従って，先に SUFARY Perl Module をイン
+ストールしておいて下さい．
+------
+BEGIN{
+  $sufdir = "SUFARY Perl Module をインストールしたディレクトリ名";
+  unshift(@INC, "$sufdir", "$sufdir/blib/lib", "$sufdir/blib/arch");
+}
+use SUFARY;
+------
+
+記事取り出し処理を Perl から利用する場合，BEGIN {...} に以下の行を足し
+て下さい．
+------
+  $diddir = "DID Perl Module をインストールしたディレクトリ名";
+  unshift(@INC, "$diddir", "$diddir/blib/lib", "$diddir/blib/arch");
+------
+
+変数 $sufdir, $diddir には，それぞれの環境に合わせて設定して下さい
+モジュールを make install した場合は BEGIN {...} の記述は不要です．
+
+このモジュールを使うことで，SUFARY オブジェクトが使用可能になります．
+具体的な使用方法は，後述のサンプルプログラム１か，
+$SUFARY/perl/SUFARY/test.perl を御参照下さい．また，記事取り出し処理の
+ための DID オブジェクトも使用可能になります．具体的な使用方法は，後述
+のサンプルプログラム２か，$SUFARY/perl/SUFARY/testdid.perl を御参照下
+さい．
+
+ここでは SUFARY オブジェクトと DID オブジェクトのメンバとメソッドをリ
+ストアップします．
+
+■■■ SUFARY 
+
+■■ メンバ
+
+★textfile
+
+検索対象テキストのファイル名.
+
+★textsize
+
+検索対象テキストのサイズ.
+
+★arrayfile
+
+array ファイルのファイル名.
+
+★arraysize
+
+array ファイルに含まれる要素の数.
+
+■■ メソッド
+
+★new TEXT_FILE [ARRAY_FILE]
+
+SUFARY オブジェクトを生成します．mkary を使って array ファイルを作製し
+ておく必要があります．ファイルの読み込みに失敗したときは，undef を返し
+ます．
+
+★search(PATTERN, LEFT, RIGHT, SKIP)
+
+文字列 PATTERN を検索します．
+LEFT, RIGHT は検索する範囲を表します. デフォルト値はそれぞれ 0, suffix
+array のサイズ - 1 です.
+SKIP はテキスト側の比較開始位置を SKIP 文字後ろにずらします。デフォル
+ト値は 0 です.
+検索結果は, 検索対象テキストでの位置(オフセット)の配列です.
+
+★regex_search(PATTERN, LEFT, RIGHT)
+
+正規表現 PATTERN を検索します．
+LEFT, RIGHT は検索する範囲を表します. デフォルト値はそれぞれ 0, suffix
+array のサイズ - 1 です.
+検索結果は, 検索対象テキストでの位置(オフセット)の配列です.
+
+★case_insensitive_search(PATTERN, LEFT, RIGHT)
+
+大文字小文字を区別せずに PATTERN を検索します．
+LEFT, RIGHT は検索する範囲を表します. デフォルト値はそれぞれ 0, suffix
+array のサイズ - 1 です.
+検索結果は, 検索対象テキストでの位置(オフセット)の配列です.
+
+★get_line(OFFSET)
+
+検索対象ファイルの OFFSET バイト目を含む行を文字列として返します．
+
+★get_region(OFFSET, BTAG, ETAG)
+
+検索対象テキストの OFFSET バイト目の文字を含む，文字列 BTAG と文字列
+ETAG に囲まれた領域を，文字列として返します．
+
+★get_string(OFFSET, LEN)
+
+検索対象テキストの OFFSET バイト目から LEN バイト取り出して文字列とし
+て返します．
+
+★get_line_info(OFFSET)
+
+検索対象ファイルの OFFSET バイト目を含む行の開始位置と長さを返します．
+
+★get_region_info(OFFSET, BTAG, ETAG)
+
+検索対象テキストの OFFSET バイト目の文字を含む，文字列 BTAG と文字列
+ETAG に囲まれた領域の開始位置と長さを返します．
+
+★range_search(PATTERN, LEFT, RIGHT, SKIP)
+
+文字列 PATTERN を検索します．
+LEFT, RIGHT は検索する範囲を表します. デフォルト値はそれぞれ 0, suffix
+array のサイズ - 1 です.
+SKIP はテキスト側の比較開始位置を SKIP 文字後ろにずらします。デフォル
+ト値は 0 です.
+検索結果は, suffix array の添字(LEFT と RIGHT)です。
+
+★get_positiono(RANGE)
+
+suffix array の添字をテキストでの位置(オフセット)に変換します。
+
+
+■■■ DID メソッド
+
+■■ メンバ
+
+★file
+
+DocID ファイルのファイル名.
+
+★size
+
+DocID ファイルに含まれる記事の数.
+
+■■ メソッド
+
+★new DOCID_FILE
+
+DID オブジェクトを生成します．mkdid を使って DocID ファイルを作製して
+おく必要があります．ファイルの読み込みに失敗したときは，undef を返しま
+す．
+
+★didsearch(OFFSET)
+
+テキスト中の OFFSET バイト目が含まれる記事を探します．返し値は，記事の
+通し番号，テキスト中での記事の開始位置，記事のバイト数のリストです．該
+当する記事が見つからなかった場合，undef を返します.
+
+■■■ サンプルプログラム
+
+★サンプルプログラム１(基本的な検索)
+------
+#!/usr/local/bin/perl
+BEGIN {
+    $sufdir = "/home/tatuo-y/work/sufary/sufary/perl/SUFARY";
+    unshift(@INC, "$sufdir", "$sufdir/blib/lib", "$sufdir/blib/arch");
+}
+use SUFARY;
+
+$ary = SUFARY->new("/home/tatuo-y/work/sufary/sufary/sample.txt");
+@res = $ary->search("歴史"); # 検索！
+print "FOUND ", $#res + 1, "\n";
+
+# 表示
+foreach $i (@res) {
+    print ">>>\t",$ary->get_line($i);
+    print "\tキーワードはテキストの先頭から数えて $i 文字目にありました\n";
+    print "\tこの行は以下の記事に含まれています\n",
+              $ary->get_block($i,'<DOC>','</DOC>'),"\n";
+}
+------
+
+★サンプルプログラム２(DocIDを用いた検索)
+------
+#!/usr/local/bin/perl
+BEGIN {
+    $sufdir = "/home/tatuo-y/work/sufary/sufary/perl/SUFARY";
+    unshift(@INC, "$sufdir", "$sufdir/blib/lib", "$sufdir/blib/arch");
+    $diddir = "/home/tatuo-y/work/sufary/sufary/perl/DID";
+    unshift(@INC, "$diddir", "$diddir/blib/lib", "$diddir/blib/arch");
+}
+use SUFARY;
+use DID;
+
+$ary = SUFARY->new("/home/tatuo-y/work/sufary/sufary/sample.txt");
+$did = DID->new("/home/tatuo-y/work/sufary/sufary/sample.txt.did");
+
+# AND検索をやってみる  '自然&歴史'
+@res = $ary->search("自然");
+foreach $i (@res) {
+    ($doc_no, $start, $size) = $did->didsearch($i);
+    if(define($doc_no)){$check[$doc_no] = 1;}
+}
+@res = $ary->search("歴史");
+foreach $i (@res) {
+    ($doc_no, $start, $size) = $did->didsearch($i);
+    if(define($doc_no) && $check[$doc_no] == 1){
+	print $ary->get_string($start,$size),"\n";
+	$check[$doc_no] = 0;
+    }
+}
+------
+
+$Id: ReferenceP.txt,v 1.5 2000/09/10 10:34:33 tatuo-y Exp $

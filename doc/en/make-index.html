@@ -1,0 +1,414 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+        "http://www.w3.org/TR/REC-html40/strict.dtd">
+<!-- $Id: make-index.html,v 1.6 2000/11/28 07:56:42 tatuo-y Exp $ -->
+<html>
+<head>
+<link rel=stylesheet href="../sufary.css">
+<link rev=made href="mailto:tatuo-y@is.aist-nara.ac.jp">
+<link rel="NEXT" HREF="http://cl.aist-nara.ac.jp/lab/nlt/ss/">
+<title>SUFARY: How to make index-files</title>
+</head>
+<body lang="ja">
+<h1>Guide for making index-files</h1>
+<p>Last Modified: 1999-10-20</p>
+<address>
+Yamasita, Tatuo (translated by Kaoru, Yamamoto)
+</address>
+<hr>
+
+<dl>
+<dt>Notation
+<dd>$SUFRAY : Directory for SUFARY package
+</dl>
+
+
+<h2><a name="intro">Introduction</a></h2>
+
+<p>
+SUFARY can perform two kinds of text searching described below:
+</p>
+
+<dl>
+<dt>String Search
+<dd>
+String Search finds the chracter position at which the
+ keyword is found in a text.
+
+<dt>Text Area Search
+<dd>
+
+A "text area" means a string enclosed(embraced) by a SGML-like
+tag. For example, a string "Article" enclosed by tags
+"&lt;atrticle&gt;" and "&lt;/atrticle&gt;" and a string "Title"
+enclosed by tags "&lt;title&gt;" and "&lt;/title&gt;" are text areas.
+Text Area Search finds a text area where a keyword exists.
+</dl>
+
+<p>
+In either search, SUFARY needs an "array file" in addition
+to the text you want to search. <em>You can build an array
+file using "mkary" command (see below).</em>
+</p>
+
+<p>
+Moreover, in a text area search, SUFARY needs an "DocID
+file" in addition to the text and the array file. <em>You
+can build an array file using "mkdid" command (see
+below).</em>
+</p>
+
+<p class="caption">// Files and Builders //</p>
+
+<table summary="list of index files and tools" border="1">
+<tr> <td> Files </td> <td> Purposes </td> <td> Builder </td>
+<tr> <td> array file </td> <td> mandate for String Search </td> <td> mkary </td>
+<tr> <td> DocID file </td> <td> mandate for Text Area Search </td> <td> mkdid </td>
+</table>
+
+<p>
+For SUFARY versions 2.1b3 or earlier, array files and DocID
+files are CPU-dependent due to the problem of
+byte-order. However, for SUFARY version 2.1 (or later) byte
+order is *always* big endian irrespective of CPU platform.
+You can convert little endian to big endian for array or
+DocID files by the following Perl one-liner:
+</p>
+
+<pre>
+% perl -e '$_ = join "", &lt;&gt;; s/(.)(.)(.)(.)/$4$3$2$1/gs; print' \
+  foo.ary &gt; foo.ary.new
+% mv foo.ary.new foo.ary
+</pre>
+
+
+<h2><a name="make-array-file">How to make an array file</a></h2>
+
+<p>
+Dependeing on the granuality you wish to search, you need to
+make different array files.
+</p>
+
+<p>
+If you make an array file based on a character, you can find
+all substrings in the text.  For example, if you make a
+character-based array file for samp1.txt below, you can
+find substrings not only "YAMASITA" and "Tatuo", but also
+"ASITA T" and "st-na".
+</p>
+
+<p class="caption">// samp1.txt //</p>
+
+<pre>
+YAMASITA Tatuo
+tatuo-y@is.aist-nara.ac.jp
+http://cl.aist-nara.ac.jp/~tatuo-y/
+</pre>
+
+<p>
+If you make an array file based on a line, you can find all
+substrings that begin with the head of the line.
+For example, you make a line-based array file for samp1.txt above,
+you can find substrings such as "YAMASITA", "YAM", and "http" but
+cannot find substrings such as "aist" and "Tatuo". This is
+because "aist" and "Tatuo" do not begin with the head of the
+line. A line-based array file is suitable for dictionary
+search as in samp2.txt below. The line-based array file is
+more compact than the character-based array file in size for
+the same plain text.
+</p>
+
+<p class="caption">// samp2.txt //</p>
+
+<pre>
+fish SAKANA
+boy OTOKONOKO
+girl ONNANOKO
+</pre>
+
+
+<p>
+A program for array files can be found in <code>$SUFARY/mkary/mkary</code>.
+</p>
+
+
+<h3><a name="mkary-sample">Example</a></h3>
+
+<p class="caption">// making a character-based array file //</p>
+
+<pre>
+array% mkary /home/tatuo-y/data/ecoli
+Save to "/home/tatuo-y/data/ecoli.ary"
+Reading text file "/home/tatuo-y/data/ecoli"
+++++++++++++++++++++ 1M
+++++++++++++++++++++ 2M
+++++++++++++++++++++ 3M
+++++++++++++++++++++ 4M
+++++++++++++
+Sorting...
+Saving...
+Done.
+</pre>
+
+<p class="caption">// making a line-based array file //</p>
+
+<pre>
+array% mkary -l samp2.txt
+Save to "samp2.txt.ary"
+Reading text file "samp2.txt.ary"
+ 
+Sorting...
+Saving...
+Done.
+</pre>
+
+<p>
+<u>A handy search program to disply search results line by
+line</u> sass can be found in <code>$SUFARY/tools/sass</code>.
+</p>
+
+<pre>
+% sass girl samp2.txt
+19:0:girl ONNANOKO
+% sass boy samp2.txt
+8:0:boy OTOKONOKO
+</pre>
+
+
+<h3><a name="mkary-usage">Usage</a></h3>
+
+<pre>
+mkary [-c|w|l|b] [-#] [-q] [-ns] [-so] [-J] [-o ARRAY_FILE]
+        [-M MEGABYTE] TEXT_FILE
+</pre>
+
+<p>
+TEXT_FILE is the name of file for which you wish to
+search. By default, the corresponding array file will be in
+the form "TEXT_FILE.ary".
+</p>
+
+<dl>
+<dt>
+-o ARRAY_FILE
+<dd>
+Specifies a file name for an array file. If no options,
+defualts to TEXT_FILE.ary.
+<dt>
+-c
+<dd>
+Makes a character-based array file. Enables to find any
+substrings in a text file. An Japanese
+character (EUC-JP) is asuumed to be 2 bytes.
+<dt>
+-l
+<dd>
+Makes a line-based array file. Enables to find any
+prefixes( substrubgs beginning with the head of a line).
+Suitable for a dictionary search.
+<dt>
+-w
+<dd>
+Makes a word-based array file. A word is defined to be a
+string separated by a <u>newline</u>, a space or a tab.
+<dt>
+-b
+<dd>
+Makes a byte-based array file.
+<dt>
+-J
+<dd>
+Ignores characters except for Japanese characters(EUC) and
+'&lt;' when making a character-based array file. Strings that
+begin with a character other than a Japanese charater(EUC)
+and a tag beginning with '&lt;' cannot be searched any
+longer. But this option has a benefit of reducing the size
+of an array file.
+<dt>
+-q
+<dd>
+No Message display during execution.
+<dt>
+-ns
+<dd>
+No Sort: Makes an UNSORTED array files. This cannot be used
+for <nb>string nor text area</nb> searching.
+<dt>
+-so
+<dd>
+Sort Only: Sorts an existing array file which can then be
+used for <nb>string nor text area</nb> searching.
+<dt>
+-#
+<dd>
+Ignores lines begginning with "#". Only valid when [-l]
+option is also in use.
+<dt>
+-M MEGABYTE
+<dd>
+Partitions texts, sorts each text and merge them.
+MEGABYTE is the size of partitions to make. Use this option
+when little memory is available.
+<pre>
+Example: mkary -M 3 sample.txt
+</pre>
+</dl>
+
+
+<h2><a name="make-docid-file">How to make DocID file</a></h2>
+
+<p>
+Suppose that there is a text in which multiple articles are
+enclosed by tags &lt;ARTICLE&gt; and &lt;/ARTICLE&gt; as in samp3.txt.
+We wish to find articles where a string "自然言語処理"
+exists.
+</p>
+
+<p class="caption">// samp3.txt //</p>
+
+<pre>
+&lt;ARTICLE&gt;
+形態素システム『茶筌』は２０世紀末に奈良先端大で開発された・・・（略）
+・・・フリーソフトとして公開・・・（略）・・・
+&lt;/ARTICLE&gt;
+&lt;ARTICLE&gt;
+２１世紀初頭の自然言語処理システム開発への過剰な投資により、粗悪製品が
+乱造され・・・（略）・・・若者の自然言語処理ばなれが深刻・・・（略）・
+・・結局我々人間は歴史から何も学んでいないということを実感させられる。
+&lt;/ARTICLE&gt;
+</pre>
+
+<p>
+Array files enable us to find the positions of a string "自然
+言語処理" in a text. But it is not easy to find which
+articles a string "自然言語処理" exists using array
+files. To overcome this, SUFARY offers DocID files for this
+task. DocID files contain position information for start
+tags ( e.g. &lt;ARTICLE&gt; ) and end tags ( e.g. &lt;/ARTICLE&gt; ) and
+equip for efficient text area searching. For more
+information, visit SUFARY home page at
+<a accesskey="S" href="http://cl.aist-nara.ac.jp/lab/nlt/ss/">&lt;http://cl.aist-nara.ac.jp/lab/nlt/ss/&gt;</a>.
+</p>
+
+
+<h3><a name="mkdid-sample">Example</a></h3>
+
+<p>
+A program for DocID files can be found in <code>$SUFARY/mkdid/mkdid</code>.
+</p>
+
+<p>
+First, we need to make array files by the mkary command.
+</p>
+
+<pre>
+% mkary samp3.txt
+Save to "samp3.txt.ary"
+Reading text file "samp3.txt"
+
+Sorting...
+Saving...
+Done.
+</pre>
+
+<p>
+Then, make a DocID file by specifying tags for a text area.
+By default, the file names for corresponding DocID file is
+"samp3.txt.did".
+</p>
+
+<pre>
+% mkdid '&lt;ARTICLE&gt;' '&lt;/ARTICLE&gt;' samp3.txt
+Number of Documents = 2
+sorting...
+writting...
+done.
+</pre>
+
+<p>
+<u>A handy text area search program to disply results</u> af
+can be found in <code>$SUFARY/tools/af</code>.
+</p>
+
+<pre>
+% af '自然言語処理' samp3.txt samp3.txt.did
+FOUND 1
+&lt;ARTICLE&gt;
+２１世紀初頭の自然言語処理システム開発への過剰な投資により、粗悪製品が
+乱造され・・・（略）・・・若者の自然言語処理ばなれが深刻・・・（略）・
+・・結局我々人間は歴史から何も学んでいないということを実感させられる。
+&lt;/ARTICLE&gt;
+</pre>
+
+<p>
+BUT, it is rare to find text areas that have the same tags
+for the beginning and the end. For example, the text below
+does not have the end tag.
+</p>
+
+<p class="caption">// samp4.txt //</p>
+
+<pre>
+#ID-001
+形態素システム『茶筌』は２０世紀末に奈良先端大で開発された・・・（略）
+・・・フリーソフトとして公開・・・（略）・・・
+#ID-002
+２１世紀初頭の自然言語処理システム開発への過剰な投資により、粗悪製品が
+乱造され・・・（略）・・・結局我々人間は歴史から何も学んでいないという
+ことを実感させられる。
+#ID-003
+裏自然言語処理研究会のお知らせ：本日午後３時・・・（略）・・・ふるって
+御参加下さい。
+</pre>
+
+<p>
+In such a case, we specify one tag that appears in a text.
+</p>
+
+<pre>
+% mkdid '#ID-' samp4.txt
+Number of Documents = 3
+sorting...
+writting...
+done.
+</pre>
+
+
+<h3><a name="mkdid-usage">Usage</a></h3>
+
+<pre>
+mkdid [-q] [-o DOCID_FILE] START_TAG [END_TAG] TEXT_FILE 
+</pre>
+
+<p>
+TEXT_FILE is the name of file for which you wish to
+search. You need to accompany the array file
+"TEXT_FILE.ary". START_TAG and END_TAG are the names of tags
+that enclose a text area respectively. END_TAG is optional.
+</p>
+
+<dl>
+<dt>
+-o DOCID_FILE
+<dd>
+Specifies a file name for a DocID file. If no options,
+defualts to TEXT_FILE.ary.
+<dt>
+-q
+<dd>
+No Message display during execution.
+</dl>
+
+
+<hr>
+<address>
+tatuo-y@is.aist-nara.ac.jp
+</address>
+</body>
+</html>
+
+
+
+
+
+
+

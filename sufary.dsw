@@ -1,0 +1,95 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# åxçê: Ç±ÇÃ‹∞∏ΩÕﬂ∞Ω Ãß≤Ÿ Çï“èWÇ‹ÇΩÇÕçÌèúÇµÇ»Ç¢Ç≈Ç≠ÇæÇ≥Ç¢!
+
+###############################################################################
+
+Project: "libsufary"=.\lib\libsufary.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name sufary
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "mkary"=.\src\mkary.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libsufary
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name sufary
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "sass"=.\src\sass.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libsufary
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name sufary
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "sufary"=.\sufary.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "test"=.\lib\test.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libsufary
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

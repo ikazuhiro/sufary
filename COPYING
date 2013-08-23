@@ -1,0 +1,65 @@
+SUFARY
+  Version 0.98   22     June 1997
+  Version 1.00   31     July 1997
+  Version 2.0b1  31    March 1998
+  Version 2.0b2  30    April 1998
+  Version 2.0b3  20      May 1998
+  Version 2.0     2     June 1998
+  Version 2.1b1  18 November 1998
+  Version 2.1b2   3  January 1999
+  Version 2.1b3  29     June 1999
+  Version 2.1    14   Octber 1999
+  Version 2.3.2   5 December 1999
+
+Copyright 1997,1998,1999
+Computational Linguistics Laboratory, 
+Nara Institute of Science and Technology.
+All Rights Reserved.
+
+Use, reproduction, and distribution of this software is permitted.
+Any copy of this software, whether in its original form or modified,
+must include both the above copyright notice and the following
+paragraphs.
+
+Nara Institute of Science and Technology (NAIST),
+the copyright holders, disclaims all warranties with regard to this
+software, including all implied warranties of merchantability and
+fitness, in no event shall NAIST be liable for
+any special, indirect or consequential damages or any damages
+whatsoever resulting from loss of use, data or profits, whether in an
+action of contract, negligence or other tortuous action, arising out
+of or in connection with the use or performance of this software.
+
+
+----------------------------------------------------------------------
+---- SUFARY License 試案
+	
+SUFARY License 0.9
+
+Copyright (C) 1999 Project SUFARY.
+                                                  All rights reserved. 
+
+このライセンスは、SUFARY に関するライセンスを定めたものです。SUFARY の
+利用と再配布の際には、以下の条件を守ってください。
+
+1.このソフトウェア(ソースプログラム、文書)の著作権は、ソフトウェア作者
+  に帰属します。
+
+  ただし、一部 GNU Public License (GPL) に基づくソースプログラムが含ま
+  れています(ファイルのヘッダ部を見て判断できます)。これらのソースプロ
+  グラムは GPL に従って下さい。以降、ソフトウェアとはこれらのソースプ
+  ログラムを除いたものを指します。
+
+2.このソフトウェアの利用は無料であり、利用の形態も制限しません。譲渡、
+  配布も自由です。その際には、このライセンス文書と、原作者の氏名を明ら
+  かにする文書を 添付してください。
+
+3.このソフトウェアに対して、自由に再利用、改変を行ってもかまいません。
+  但し、改変したものを配布する場合には、このライセンス文書と、原作者の
+  氏名、改変した旨を明らかにする文書を添付してください。
+
+4.このソフトウェアは利用者個人の責任において利用して下さい。このソフト
+  ウェアを利用する事によって発生するいかなる不利益に対しても、作者や 
+  Project SUFARY は責任を負わないものとします。
+
+

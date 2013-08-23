@@ -1,0 +1,28 @@
+README 990629  山下達雄(tatuo-y@is.aist-nara.ac.jp)
+━━━━━━
+ドキュメント
+━━━━━━
+
+README	このファイル
+
+MakeIndex.txt	検索用ファイル作成ガイド for Ver.2.1
+
+Tools.txt	付属アプリケーション利用ガイド for Ver.2.1
+
+ReferenceC.txt	C Library Reference for Ver.2.1
+
+ReferenceP.txt	Perl Module Reference for Ver.2.1
+
+txt2txt.perl	*.txt をみやすいフォーマットに変換するプログラム
+
+
+samp/		マニュアルで使われているサンプルデータ
+
+guide/		「SUFARYガイド」大幅加筆改訂！
+
+
+★「SUFARYガイド」がうまくコンパイルできなかったときは、SUFARYホームページに
+  PostScript版がありますので、そこからどうぞ。
+		
+	SUFARYホームページ: http://cl.aist-nara.ac.jp/lab/nlt/ss/
+

@@ -1,0 +1,57 @@
+			To do list for SUFARY
+
+Near future
+
+* perl によるまともなインデクサ。ytoがローカルに所有。要改良。
+
+* まともなマージ。
+
+* Index Point 周りを見直す(以下のような要求を満たしつつ)。
+   - 行単位だけど、'#' 始まりの行は無視したい
+   - 日本語EUC(0x80-0xFF)のみだけど、'<' も対象にしたい (現在も可)
+  または、index point strip 機能など。
+
+* sass の強調を、反転だけでなく重ね打ちも選べるようにする。
+
+* test.c で index 作成も含めた本格テスト。test suite
+
+* mkary, mkdid に getpot
+
+* make-index.c の関数の perl モジュール化。
+
+* make-index.c の関数のドキュメント化。
+
+* perl モジュールのドキュメント化。
+
+* [ok] sa_didsearch() で検索失敗したときに次のテキストエリアの番号を 
+  no に入れる。タグの入れ子検索に必須。
+
+* 複雑なテキストエリア検索をサポートする関数。
+
+* af を改良。regex など。
+
+* 曖昧検索。
+
+* 構造体・関数の名前見直し。
+
+
+Far future
+
+* sufary.cgi : 複数タグにも対応。
+
+* regex の改良。入れ子に対応したい。
+
+
+I want help!
+
+
+
+It is challenging
+
+* 追加機能。方針： index を多めにとっておく
+
+
+It is too challenging ;-)
+
+
+

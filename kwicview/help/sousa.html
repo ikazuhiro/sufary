@@ -1,0 +1,207 @@
+┏━━━━━━━━┓
+┃ボタンなどの説明┃
+┗━━━━━━━━┛
+ 
+button $w.rst.t1.back -text "もどる" -borderwidth 0 -bg skyblue -command "online_help help/index.html $w";
+$w.rst.t1 window create insert -window $w.rst.t1.back;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+
+●検索結果内では、改行コードやタブなどの制御文字は "!" と表示されます。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.quit -text Quit;
+$w.rst.t1 window create insert -window $w.rst.t1.quit;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+KWICVIEW を終了します。Ctrl+C でも終了できます。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.fo -text Open;
+$w.rst.t1 window create insert -window $w.rst.t1.fo;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+ここをクリックすると、ファイル選択のためのウィンドウが開かれます。
+ファイルを選択することにより、検索対象ファイルをそのファイルに変更することができます。
+検索対象ファイルにはインデックスファイルが必要になります。
+例えば、「/home/tatuo-y/file1」というファイルを選択したら「/home/tatuo-y/file1.ary」というインデックスファイルがなければ検索を行なうことができません。
+インデックスファイルを作成するためにはSUFARYパッケージに含まれているmkaryというプログラムを使用します。
+詳しくはマニュアルを御覧下さい。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.ks -text "検索";
+$w.rst.t1 window create insert -window $w.rst.t1.ks;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+右側のスペースに入力したキーワードで検索を行います。
+
+・キーワード検索
+  普通の全文検索です。キーワードの周辺部分を表示します。
+
+・near検索
+  二つのキーワードが指定された距離以内に現れている部分を表示します。
+  二つのキーワードとそれらのキーワード間の距離を指定して検索します。
+  [near 数字] で、キーワード間の距離(半角文字数)を指定します。
+  例： 料金[near 4]値上げ
+    「…料金値上げ…」「…料金が値上げ…」「…料金あす値上げ…」などに
+     マッチします。
+
+・exact検索
+  二つのキーワードが指定された距離だけぴったり離れて現れている部分を表示します。
+  二つのキーワードとそれらのキーワード間の距離を指定して検索します。
+  [exact 数字] で、キーワード間の距離(半角文字数)を指定します。
+  例： 京都[near 4]大学
+    「…京都産業大学…」「…京都女子大学…」などにマッチします。
+    「京都」と「大学」の間はぴったし4文字離れています。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.tkks -text "追加検索";
+$w.rst.t1 window create insert -window $w.rst.t1.tkks;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+検索の結果が多すぎる場合など、直前の検索に用いたキーワードをより長い
+(具体的な)ものにして、検索結果を絞り込みたいことがあります。追加検索に
+より、このような絞り込みを高速に実行できます。追加検索に用いるキーワー
+ドは、前の検索に用いたキーワードに何文字か足したものでなければなりませ
+ん。
+
+例えば、「奈良」で検索を行うと結果が多すぎたという場合、「奈良先端」で
+追加検索を行い検索結果を絞り込みます。まだ多すぎるという場合、「奈良先
+端科学技術大学院大学」で再度追加検索を行います。
+
+「奈良」で検索した結果に対し、「先端」や「大学院」といったキーワードで
+追加検索することはできません。追加検索を行うためには必ず直前の検索に用
+いたキーワードから始まる文字列を使用しなくてはなりません。
+
+先の例の場合、絞り込みを行う際に、追加検索でなく普通の検索(追加検索で
+ない検索のこと)を行っても結果は同じです。つまり、「奈良」での検索の後
+に、「奈良先端」で普通の検索を行なっても、「奈良先端」で追加検索を行なっ
+た場合と検索結果は同じになります。追加検索は、より高速な検索が期待でき
+るという利点があるだけです。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.cl -text "Clean";
+$w.rst.t1 window create insert -window $w.rst.t1.cl;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+右側のスペース(検索のためのキーワードを入力する場所です)内の文字を消去します。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+menubutton $w.rst.t1.log -text "LOG" -ind 1 -bg bisque2;
+$w.rst.t1 window create insert -window $w.rst.t1.log;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+今までの検索に用いたキーワードがメニュー形式で保存されています。
+ある一定の数に達したら、最も古いものから一つずつ消されます。
+メニューの一番したの項目「LOG消去」により、保存されている全てのキーワードが消去されます。
+起動時にはあらかじめキーワードの例が保存されていることがあります。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+global show_from_now ihk;
+entry $w.rst.t1.from -width 4 -textvariable show_from_now;
+label $w.rst.t1.m1 -text "番目から" -bg bisque2;
+entry $w.rst.t1.num -width 3 -textvariable ihk;
+menubutton $w.rst.t1.m2 -ind 1 -text "個" -bg bisque2;
+$w.rst.t1 window create insert -window $w.rst.t1.from;
+$w.rst.t1 window create insert -window $w.rst.t1.m1;
+$w.rst.t1 window create insert -window $w.rst.t1.num;
+$w.rst.t1 window create insert -window $w.rst.t1.m2;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+検索結果は下方のスペースに表示されますが、検索結果が多いときは、検索結果の転送・表示処理にとてつもなく時間がかかってしまうことがあります。
+KWICVIEWでは、一度に表示する検索結果の数を設定できるようになっており(「…から□個」)、任意の数だけ表示できます。
+また、検索結果には通し番号が振られています。
+この番号を指定することによって(「□番目…」)、検索結果の任意の部分を表示できます。
+数値の変更後は改行により、表示に反映されます。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.shj -text "再表示";
+$w.rst.t1 window create insert -window $w.rst.t1.shj;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+表示がおかしくなったらクリックしてみて下さい。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.nX -text "次の??個";
+$w.rst.t1 window create insert -window $w.rst.t1.nX;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+検索結果のうち、現在表示されている範囲の次の??個を表示する。
+例えば、現在、検索結果の1番目から20個表示されている場合、
+21番目から20個の検索結果が表示される。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.bX -text "前の??個";
+$w.rst.t1 window create insert -window $w.rst.t1.bX;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+検索結果のうち、現在表示されている範囲の前の??個を表示する。
+例えば、現在、検索結果の101番目から20個表示されている場合、
+81番目から20個の検索結果が表示される。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.zhj -text "全表示";
+$w.rst.t1 window create insert -window $w.rst.t1.zhj;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+検索結果を全て表示します。全てを表示するわけですから検索結果が多いと非常に時間がかかります。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+menubutton $w.rst.t1.kw1 -ind 1 -text "KWIC幅" -bg bisque2;
+global kwic_width;
+entry $w.rst.t1.kw2 -width 3 -textvariable kwic_width;
+$w.rst.t1 window create insert -window $w.rst.t1.kw1;
+$w.rst.t1 window create insert -window $w.rst.t1.kw2;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+検索結果は、キーワードとキーワードの前後何文字かからなる文字列として表示されます。
+KWIC幅はキーワードの前後に表示する文字列の長さを表します。
+例えば、KWIC幅を70すると、以下のような文字列が検索結果として表示されます。
+
+------(70文字)------[キーワード]------(70文字)------
+
+数値の変更後は改行により、表示に反映されます。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.tyu -text "中心揃え";
+$w.rst.t1 window create insert -window $w.rst.t1.tyu;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+KWICVIEWには、一番下に水平方向のスクロールバーがあります。
+これにより、キーワードの前後の文字列を自由気ままに見ることができます。
+しかし、ときには調子に乗りすぎてキーワードを見失ってしまうこともあります。
+こんなときには「中心揃え」をクリックすることにより、
+キーワードが中心になるように画面が勝手にスクロールされます。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+label $w.rst.t1.kg1 -text "区切り" -bg bisque2;
+global kugiri_str;
+entry $w.rst.t1.kg2 -width 8 -textvariable kugiri_str;
+$w.rst.t1 window create insert -window $w.rst.t1.kg1;
+$w.rst.t1 window create insert -window $w.rst.t1.kg2;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+
+検索結果を表示しているところを見てみると、キーワードだけ色が異なっていることが分かります。
+そこに、マウスを持って行って左ボタンでクリックすると、別ウィンドウが開かれ、そこにキーワードを中心とした、ファイルの一部(「記事」と呼ぶことにする)が表示されます。
+その記事をファイルから取り出すために「区切り」で指定された文字列を用いるのです。
+つまり指定された「区切り」文字列に挟まれた文字列が記事ということになります。
+改行などの制御文字は指定できません。
+例えば、以下のようなSGML風のタグで囲まれている場合、<DATA> を「区切り」とするのが良いでしょう。
+
+...
+</DATA>
+<DATA>
+1998/01/01
+データの内容だよ。うひょうひょ。
+</DATA>
+<DATA>
+...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.back2 -text "もどる" -borderwidth 0 -bg skyblue -command "online_help help/index.html $w";
+$w.rst.t1 window create insert -window $w.rst.t1.back2;
+$w.rst.t1 insert end "\n"; incr line_no;
+END
+
+

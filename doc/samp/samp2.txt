@@ -1,0 +1,3 @@
+fish 魚
+boy 男の子
+girl 女の子

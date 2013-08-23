@@ -1,0 +1,101 @@
+=begin
+= SUFARY Ruby Module 3.x Reference
+== Sufary class
+array ファイル（とテキストファイル）のクラスです。
+
+--- Sufary.new(text_file[, array_file])
+    検索のためにテキストファイルと array ファイルを開きます。
+    引数にそれぞれのファイル名を指定します。
+
+    array ファイル名を省略すると、array ファイル名は
+    ((|text_file|)) + (('".ary"')) になります。
+
+--- Sufary#array_size
+    array ファイルに含まれる要素数を返します。
+
+--- Sufary#text_size
+    テキストファイルの大きさを返します。
+
+--- Sufary#search(pattern[, left[, right[, base_text_skip]]])
+    キーワード検索を行ないます。
+
+    検索結果は (({Array})) で返します。
+
+    ((|left|)) と ((|right|)) は検索する範囲を表します。
+    0 から (({Sufary#array_size - 1})) までの値を取れます。
+    指定しなければ array ファイルの全範囲を検索します。
+
+    ((|base_text_skip|)) は、テキスト側の比較開始位置を
+    ((|base_text_skip|)) バイト後ろにずらします。デフォルトは 0 です。
+
+--- Sufary#get_context_lines(stridx[, bkwrd, frwrd])
+    ((|stridx|)) が含まれる 1行と、その直前の((|bkwrd|))行、
+    直後の((|frwrd|)) 行を取り出します。
+
+    取り出された文字列は検索パターンの前、パターン、パターンの後ろの
+    3つの部分に分かれ (({Array})) として返ります。
+
+--- Sufary#get_context_region(stridx, begin_tag, end_tag)
+    ((|stridx|)) が含まれ ((|begin_tag|)) と ((|end_tag|)) で
+    囲まれた領域を取り出します。
+
+    取り出された文字列は検索パターンの前、パターン、パターンの後ろの
+    3つの部分に分かれ (({Array})) として返ります。
+
+--- Sufary#get_string(offset, length)
+    先頭から((|offset|))バイト目から((|length|))バイトの文字列を
+    取り出します。
+
+== SufaryDid class
+DocID ファイルのクラスです。
+
+--- SufaryDid.new(did_file, array)
+    DocID ファイルを開きます。
+    ((|array|))は DocID ファイルに対応する
+    (({Sufary})) のインスタンスです。
+
+--- SufaryDid#get_doc_number(stridx)
+    ((|stridx|)) が含まれるテキストエリアの通し番号を返します。
+
+    該当するテキストエリアがなければ負の値が返ります。
+
+--- SufaryDid#get_doc_region(stridx)
+    ((|stridx|)) が含まれるテキストエリアを取り出します。
+
+    取り出された文字列は検索パターンの前、パターン、パターンの後ろの
+    3つの部分に分かれ (({Array})) として返ります。
+
+    該当するテキストエリアがなければ (({nil})) が返ります。
+
+== サンプルプログラム
+
+ #!/usr/local/bin/ruby
+ require 'sufary'
+
+ pattern = ARGV.shift
+ ary = Sufary.new(ARGV.shift)
+ did = SufaryDid.new(ARGV.shift, ary)
+
+ # array ファイルの要素数
+ print "array size: ", ary.array_size, "\n"
+ # テキストファイルの大きさ
+ print "text size: ", ary.text_size, "\n"
+
+ # 先頭から 4バイトを表示
+ print ary.get_string(0, 4), "\n"
+
+ # 検索
+ result = ary.search(pattern)
+
+ # 前後 2行を表示 
+ result.each {|i| print get_context_lines(i, 2, 2)}
+ # <P>、</P> で囲まれた領域を表示
+ result.each {|i| print get_context_region(i, "<P>", "</P>"), "\n"}
+
+ # テキストエリアの通し番号を表示
+ result.each {|i| print "DocID number: ", get_doc_number(i), "\n"}
+ # テキストエリアを表示
+ result.each {|i| print get_doc_region(i), "\n"}
+
+=end
+$Id: Reference.rd.ja,v 1.3 2000/07/15 07:45:35 kazuma-t Exp $

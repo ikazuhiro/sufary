@@ -1,0 +1,16 @@
+# $Id: typemap,v 1.1 2000/07/07 08:13:25 kazuma-t Exp $
+TYPEMAP
+SUFARY *	T_PTROBJ
+off_t		T_IV
+SA_STRING	T_SA_STR
+#
+INPUT
+T_SA_STR
+	{
+	  int len;
+	  $var.ptr = (char *)SvPV($arg,len);
+	  $var.len = len;
+	}
+#
+OUTPUT
+	sv_setpvn((SV*)$arg, $var.ptr, $var.len);

@@ -1,0 +1,406 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+        "http://www.w3.org/TR/REC-html40/strict.dtd">
+<!-- $Id: make-index.html,v 1.7 2000/11/28 07:56:42 tatuo-y Exp $ -->
+<html>
+<head>
+<link rel=stylesheet href="../sufary.css">
+<link rev=made href="mailto:tatuo-y@is.aist-nara.ac.jp">
+<link rel="NEXT" HREF="http://cl.aist-nara.ac.jp/lab/nlt/ss/">
+<title>SUFARY: How to make index-files</title>
+</head>
+<body lang="ja">
+<h1>検索用ファイル作成ガイド</h1>
+<p>Last Modified: 1999-10-18</p>
+<address>
+山下 達雄 Yamasita, Tatuo
+</address>
+<hr>
+
+<ul>
+<li><a href="#intro">はじめに</a>
+<li><a href="#make-array-file">array ファイルの作り方</a>
+  <ul>
+  <li><a href="#mkary-sample">実行例</a>
+  <li><a href="#mkary-usage">書式</a>
+  </ul>
+<li><a href="#make-docid-file">DocID ファイルの作り方</a>
+  <ul>
+  <li><a href="#mkdid-sample">実行例</a>
+  <li><a href="#mkdid-usage">書式</a>
+  </ul>
+</ul>
+
+<hr>
+
+<dl>
+<dt>Notation
+<dd>
+$SUFRAY : SUFARYパッケージを展開したディレクトリを表します。
+</dl>
+
+
+<h2><a name="intro">はじめに</a></h2>
+
+<p>
+SUFARY では検索対象テキストに対して以下の２種類の検索ができます。
+</p>
+
+<dl>
+<dt>文字列検索
+<dd>
+検索キーワードがテキスト中の何文字目にあるかを調べます。
+<dt>テキストエリア検索
+<dd>
+テキストエリアとは、明確なタグで囲まれた部分文字列を意味します。例えば、
+&lt;atrticle&gt;タグと&lt;/atrticle&gt;タグとで囲まれた「記事」や、
+&lt;title&gt;タグと&lt;/title&gt;タグとで囲まれた「タイトル」などがこ
+れに当たります。テキストエリア検索は、検索キーワードを含むこれらのテキ
+ストエリアを探します。
+</dl>
+
+<p>
+どちらの検索を行うにしても、SUFARY では、
+検索対象テキストごとに array ファイルを作る必要があります。
+</p>
+
+<p>
+テキストエリア検索を行うためには、さらに DocID ファイルを作る必要があります。
+</p>
+
+<p class="caption">// 検索用ファイルとそれを作成するプログラム //</p>
+
+<table summary="list of index files and tools" border="1">
+<tr> <td> 検索用ファイル </td> <td> 使用目的 </td> <td> 作成用プログラム </td>
+<tr> <td> array ファイル </td> <td> SUFARYでの検索に必須 </td> <td> mkary </td>
+<tr> <td> DocID ファイル </td> <td> テキストエリア検索　 </td> <td> mkdid </td>
+</table>
+
+<p>
+SUFARY version 2.1b3 までは、array ファイルと DocID ファイルはバイトオー
+ダーの問題で、作成した環境 (CPU) に依存していました。version 2.1 からはバ
+イトオーダーは環境に依存せず常にビッグエンディアン (big endian) になって
+います。
+2.1b3 以前の SUFARY を用いて、
+リトルエンディアン環境で作成した array ファイル、DocID ファイルは
+以下の方法でビッグエンディアンに変換できます。
+</p>
+
+<pre>
+% perl -e '$_ = join "", &lt;&gt;; s/(.)(.)(.)(.)/$4$3$2$1/gs; print' \
+  foo.ary &gt; foo.ary.new
+% mv foo.ary.new foo.ary
+</pre>
+
+
+<h2><a name="make-array-file">array ファイルの作り方</a></h2>
+
+<p>
+どういう単位で検索をしたいかという要求によって、作成される array ファ
+イルが違ってきます。
+</p>
+
+<p>
+例えば、文字単位で array ファイルを作ると、そのテキストに含まれる全て
+の部分文字列が検索できます。samp1.txt に対して文字単位で array ファイ
+ルを作ると、"YAMASITA" や "Tatuo" はもちろん、 "ASITA T" や "st-na" といっ
+た、半端な(?)文字列でも見つけることができます。
+</p>
+
+<p class="caption">// samp1.txt //</p>
+
+<pre>
+YAMASITA Tatuo
+tatuo-y@is.aist-nara.ac.jp
+http://cl.aist-nara.ac.jp/~tatuo-y/
+</pre>
+
+<p>
+行単位で array ファイルを作ると、各行頭から始まる全ての文字列(prefix 
+といいます)が検索できます。samp1.txt に対して行単位で array ファイルを
+作ると、"YAMASITA", "YAM", "http" は見つかりますが、"aist" や "Tatuo" 
+は行頭から始まる文字列ではないので、見つかりません。行単位の array ファ
+イルは samp2.txt のような辞書の検索に向いています。array ファイルのサ
+イズも文字単位のときよりも小さくなります。
+</p>
+
+<p class="caption">// samp2.txt //</p>
+
+<pre>
+fish 魚
+boy 男の子
+girl 女の子
+</pre>
+
+
+<p>
+実際に array ファイルを作成するためのプログラムは $SUFARY/src/mkary 
+です。
+</p>
+
+
+<h3><a name="mkary-sample">実行例</a></h3>
+
+<p class="caption">// 文字単位で array ファイルを作成 //</p>
+
+<pre>
+array% mkary /home/tatuo-y/data/ecoli
+Save to "/home/tatuo-y/data/ecoli.ary"
+Reading text file "/home/tatuo-y/data/ecoli"
+++++++++++++++++++++ 1M
+++++++++++++++++++++ 2M
+++++++++++++++++++++ 3M
+++++++++++++++++++++ 4M
+++++++++++++
+Sorting...
+Saving...
+Done.
+</pre>
+
+<p class="caption">// 行単位で array ファイルを作成 //</p>
+
+<pre>
+array% mkary -l samp2.txt
+Save to "samp2.txt.ary"
+Reading text file "samp2.txt.ary"
+ 
+Sorting...
+Saving...
+Done.
+</pre>
+
+<p>
+検索結果を行単位で表示する簡単な検索プログラム sass
+($SUFARY/tools/sass)を使って検索してみます。
+</p>
+
+<pre>
+% sass girl samp2.txt
+19:0:girl 女の子
+% sass boy samp2.txt
+8:0:boy 男の子
+</pre>
+
+
+<h3><a name="mkary-usage">書式</a></h3>
+
+<pre>
+mkary [-c|w|l|b] [-#] [-q] [-ns] [-so] [-J] [-o ARRAY_FILE]
+        [-M MEGABYTE] TEXT_FILE
+</pre>
+
+<p>
+TEXT_FILE でテキストファイル名を指定します。デフォルトでは、 
+TEXT_FILE.ary という名前の array ファイルが作成されます。
+</p>
+
+<dl>
+<dt>
+-o ARRAY_FILE
+<dd>
+array ファイル名を指定できます。デフォルトは TEXT_FILE.ary。
+<dt>
+-c
+<dd>
+文字単位で array ファイルを作ります。テキスト中のあらゆる文字列がさが
+し出せます。日本語文字(EUC)は2バイトで一文字とみなします。
+デフォルトです。
+<dt>
+-l
+<dd>
+行単位で array ファイルを作ります。各行頭から始まる全ての文字列(prefix 
+といいます)が検索できます。辞書検索に向いています。
+<dt>
+-w
+<dd>
+単語単位で array ファイルを作ります。ここでいう単語とは、改行文字、ス
+ペース、タブで区切られる文字列を指します。
+<dt>
+-b
+<dd>
+バイト単位で array ファイルを作ります。
+<dt>
+-J
+<dd>
+文字単位で array ファイルを作るとき、日本語文字(EUC)と '&lt;' 以外は無視
+します。日本語(EUC)以外で始まる文字列は '&lt;' で始まるタグを除いて、検索
+できなくなりますが、array ファイルのサイズは小さくなります。
+<dt>
+-q
+<dd>
+実行中にメッセージを表示しません。
+<dt>
+-ns
+<dd>
+No Sort: ソート処理を行っていない(検索には使えません)、素の array ファ
+イルを作ります。
+<dt>
+-so
+<dd>
+Sort Only: 既存の array ファイルに対してソート処理を行い、完全な array 
+ファイル(検索に使えます)を作ります。
+<dt>
+-#
+<dd>
+"#" で始まる行を無視します。ただし、 -l オプションのときのみ有効。
+<dt>
+-M MEGABYTE
+<dd>
+テキストを分割してソートを行い、最後にマージする。
+MEGABYTE で分割単位のサイズを指定。メモリ不足のときには必須。
+<pre>
+例：mkary -M 3 sample.txt
+</pre>
+</dl>
+
+
+<h2><a name="make-docid-file">DocID ファイルの作り方</a></h2>
+
+<p>
+samp3.txt のような複数の記事(&lt;ARTICLE&gt;タグと&lt;/ARTICLE&gt;タグ
+で囲まれているテキストエリア)が含まれる記事があるとします。「文字列
+『自然言語処理』を含む記事を見つけて取り出す」という検索を行うことを考
+えます。
+</p>
+
+<p class="caption">// samp3.txt //</p>
+
+<pre>
+&lt;ARTICLE&gt;
+形態素システム『茶筌』は２０世紀末に奈良先端大で開発された・・・（略）
+・・・フリーソフトとして公開・・・（略）・・・
+&lt;/ARTICLE&gt;
+&lt;ARTICLE&gt;
+２１世紀初頭の自然言語処理システム開発への過剰な投資により、粗悪製品が
+乱造され・・・（略）・・・若者の自然言語処理ばなれが深刻・・・（略）・
+・・結局我々人間は歴史から何も学んでいないということを実感させられる。
+&lt;/ARTICLE&gt;
+</pre>
+
+<p>
+「自然言語処理」という文字列がどこにあるかは、array ファイルがあれば見
+つけることができますが、それがどの記事に含まれているかということは、
+array ファイルだけでは簡単には分かりません。そこで、SUFARY では DocID 
+ファイルというファイルを利用します。DocID ファイルには記事の開始タグと
+終了タグ(この場合は&lt;ARTICLE&gt;&lt;/ARTICLE&gt;)の位置データが格納
+されていて、これによりテキストエリア検索が効率的に行えます。
+詳しいことは、
+SUFARYホームページ
+<a accesskey="S" href="http://cl.aist-nara.ac.jp/lab/nlt/ss/">&lt;http://cl.aist-nara.ac.jp/lab/nlt/ss/&gt;</a>
+に
+ある記事取り出し処理関連ドキュメントを御参照下さい。
+</p>
+
+
+<h3><a name="mkdid-sample">実行例</a></h3>
+
+<p>
+ではさっそく DocID ファイルを作ってみましょう。
+DocID ファイルを作るプログラムは $SUFARY/src/mkdid です。
+</p>
+
+<p>
+まず、なにはともあれ、array ファイルが必要なので、mkary で作ります。
+</p>
+
+<pre>
+% mkary samp3.txt
+Save to "samp3.txt.ary"
+Reading text file "samp3.txt"
+
+Sorting...
+Saving...
+Done.
+</pre>
+
+<p>
+検索対象テキストエリア(記事)を表すタグを指定して、DocIDファイルを作り
+ます。デフォルトでは DocID ファイルは samp3.txt.did という名前になりま
+す。
+</p>
+
+<pre>
+% mkdid '&lt;ARTICLE&gt;' '&lt;/ARTICLE&gt;' samp3.txt
+Number of Documents = 2
+sorting...
+writting...
+done.
+</pre>
+
+<p>
+テキストエリア検索を行う簡単なプログラム af ($SUFARY/tools/af)を使って
+検索してみます。
+</p>
+
+<pre>
+% af '自然言語処理' samp3.txt samp3.txt.did
+FOUND 1
+&lt;ARTICLE&gt;
+２１世紀初頭の自然言語処理システム開発への過剰な投資により、粗悪製品が
+乱造され・・・（略）・・・若者の自然言語処理ばなれが深刻・・・（略）・
+・・結局我々人間は歴史から何も学んでいないということを実感させられる。
+&lt;/ARTICLE&gt;
+</pre>
+
+<p>
+しかし、世の中、テキストエリアの始まりと終わりが同じタグというデータフォー
+マットが多いのも事実です。
+</p>
+
+<p class="caption">// samp4.txt //</p>
+
+<pre>
+#ID-001
+形態素システム『茶筌』は２０世紀末に奈良先端大で開発された・・・（略）
+・・・フリーソフトとして公開・・・（略）・・・
+#ID-002
+２１世紀初頭の自然言語処理システム開発への過剰な投資により、粗悪製品が
+乱造され・・・（略）・・・結局我々人間は歴史から何も学んでいないという
+ことを実感させられる。
+#ID-003
+裏自然言語処理研究会のお知らせ：本日午後３時・・・（略）・・・ふるって
+御参加下さい。
+</pre>
+
+<p>
+こんなときはタグを一つだけ指定すればＯＫです。
+</p>
+
+<pre>
+% mkdid '#ID-' samp4.txt
+Number of Documents = 3
+sorting...
+writting...
+done.
+</pre>
+
+
+<h3><a name="mkdid-usage">書式</a></h3>
+
+<pre>
+mkdid [-q] [-o DOCID_FILE] START_TAG [END_TAG] TEXT_FILE 
+</pre>
+
+<p>
+TEXT_FILE にテキストファイル名を指定します。TEXT_FILE.ary という名前の 
+array ファイルも必要になります。START_TAG, END_TAG で、テキストエリア
+を囲むタグを指定します。END_TAG は省略できます。
+</p>
+
+<dl>
+<dt>
+-o DOCID_FILE
+<dd>
+DocID ファイル名を指定できます。デフォルトは TEXT_FILE.did。
+<dt>
+-q
+<dd>
+実行中にメッセージを表示しません。
+</dl>
+
+
+<hr>
+<address>
+tatuo-y@is.aist-nara.ac.jp
+</address>
+</body>
+</html>

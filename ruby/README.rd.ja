@@ -1,0 +1,16 @@
+=begin
+= SUFARY Ruby Module 3.x
+== インストールの方法
+先に SUFARY のライブラリをインストールしてください。
+
+その後で、
+ (1)((%ruby extconf.rb%))
+ (2)必要ならMakefileを修正
+ (3)((%make%))
+ (4)(ルート権限で)((%make install%))
+== バグ報告
+バグを発見した方は、ぜひ下記までご連絡下さい。
+
+((<URL:mailto:kazuma-t@is.aist-nara.ac.jp>))
+=end
+$Id: README.rd.ja,v 1.2 2000/06/20 04:24:18 kazuma-t Exp $

@@ -1,0 +1,9 @@
+DID.pm
+DID.xs
+MANIFEST
+Makefile.PL
+Makefile.static.PL
+test.pl
+test.txt
+test.txt.did
+typemap

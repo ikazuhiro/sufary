@@ -1,0 +1,1224 @@
+2002-01-23  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/mmp.h, lib/my-malloc.h, lib/did.h, lib/sufary.h: add extern
+	"C" (for C++,Win)
+
+	* 問題: make dist で、*.dsp が含まれない。
+
+2002-01-21  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/libsufary.dsp, src/mkary.dsp, src/sass.dsp: VC++ でコンパイ
+	ルできるように更新した。
+
+2001-02-28  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* src/mkdid.c (main): New オプション '--': これ以降の引数はオプショ
+	ンではない。(各引数先頭の '-' はオプションを意味しなくなる。)
+
+	* lib/index-point.c (sa_get_next_ip_word): Change delimier
+	difinition (add "[]"). '<>' を足したいけど、SGMLタグとしてインデク
+	シング時に無視できないので今のところ断念。
+
+2000-11-28  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/index-point.c (sa_skip_one_char_utf8): New. (ref. sary)
+
+	* lib/sufary.h: New struct ... SA_INDEX_POINT
+
+	* lib/make-index.c (sa_strcmp): Change interface
+
+	* lib/Makefile.am (libsufary_la_SOURCES): Add new files.
+
+	* lib/make-index.h: New. (it may be temporary)
+
+	* lib/index-point.c: New. (from make-index.c)
+
+	* doc/en/make-index.html: Modify
+
+	* doc/ja/make-index.html: Modify
+
+	* lib/test.c: Modify
+
+	* lib/sufary.h: Modify
+
+	* lib/make-index.c (sa_get_next_ip_byte): New.
+
+	* src/mkary.c: Fix a bug (it didn't work...).
+	Change option '-8' to '-b'.
+
+2000-11-27  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/make-index.c: インターフェース大幅変更中。すっきりさせるぞ!
+
+	* lib/test.c: Modify
+
+	* lib/sufary.h: Modify
+
+	* src/mkary.c: Modify
+
+	* lib/make-index.c (sa_write_index): Change the interface.  (Add
+	function pointer) 
+
+	* lib/search.c (cmp_sistr): Comment out "sa_dprintf" (speed-up)
+
+2000-11-22  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* perl/DID/DID.pm (DESTROY): Comment out the memory leak check.
+
+	* perl/SUFARY/SUFARY.pm (DESTROY): Comment out the memory leak
+	check.  二つ同時に new すると、最初に DESTORY するときにメモリリー
+	クすることになってしまうから。やれやれ
+
+2000-11-17  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* perl/SUFARY/SUFARY.pm (DESTROY): suf_memory_leak_check() does
+	not work after suf_closefile().  Why? 
+
+	* perl/SUFARY/SUFARY.xs: Add suf_memory_leak_check().
+
+	* lib/did.c: Add assertions.
+
+	* lib/my-malloc.c (sa_set_memory_debug_mode): Change name.  Old
+	name is sa_set_malloc_mode.
+
+	* ruby/sufary.c: Add '#include "did.h"'
+
+	* perl/DID/DID.xs: Add '#include "did.h"'
+
+	* lib/did.h: New! (from sufary.h)
+
+	* lib/file.c: Move DID related functions to did.c.
+	Add assertions.
+
+	* lib/sufary.h: Move #include "mmp.h" and "my-malloc.h" to util.h
+
+2000-10-30  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/make-index.c: Remove garbage text. (コンパイル通らんかった。
+	ゴメン)
+	(sa_is_sorted): Remove warnings.
+
+2000-10-23  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/make-index.c: Modify broken intents.
+
+	* lib/my-malloc.c: Modify broken intents.
+
+2000-10-17  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/make-index.c: Windows と UNIX で array file が異なっていたの
+	で、同じになるように修正を行う。
+	(sa_strcmp): New
+	(sa_sort_index): Use new module variable 'sa_text_last_ptr'
+	(get_char_inside_text): New
+	(suffix_compare): Update
+	(get_char_inside_text): Update
+	(sa_is_sorted): Update
+	(etc...): Update
+
+	* lib/make-index.c: Update to warning free for Win (cast of strlen)
+
+	* lib/regex.c: Update to warning free for Win (cast of strlen)
+
+	* src/sass.c: Update to warning free for Win (cast of strlen: The
+	warning message is " '<' : signed と unsigned の数値を比較しようと
+	しました。" )
+
+	* src/sass.dsp: New for Win
+
+	* src/mkary.dsp: New for Win
+
+	* lib/libsufary.dsp: New for Win
+
+	* lib/test.dsp: New for Win
+
+	* sufary.dsp: New for Win
+
+	* sufary.dsw: New for Win
+
+2000-10-16  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/test.c: Update for Win
+
+	* lib/my-malloc.c: Update
+
+	* lib/my-malloc.h: Update
+
+	* src/mkary.c: Remove yokeina include for Win
+
+	* lib/file.c: Remove yokeina include for Win
+
+	* lib/make-index.c: Remove yokeina include for Win
+
+2000-10-12  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/my-malloc.h: If DEBUG is not defined (in other words, "if
+	assert.h is invalid"), use standard malloc related functions.
+
+	* lib/my-malloc.c: Use memset insted of for-loop. Hahaha
+
+2000-10-11  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* src/mkdid.c: Use my-malloc
+
+	* lib/make-did.c: Use my-malloc
+
+	* src/af.c: Use my-malloc
+
+	* lib/file.c: Use my-malloc
+
+	* lib/mmp.c: Use my-malloc
+
+	* src/sass.c: Use my-malloc
+
+	* lib/sufary.h: Add '#include "my-malloc.h"'
+
+	* lib/my-malloc.c: New file and functions.
+	void *sa_malloc(size_t size);
+	void *sa_calloc(size_t nmemb, size_t size);
+	void sa_free(void *ptr);
+	int sa_memory_leak_check(void);
+	void *sa_malloc_list_top;
+
+	* lib/my-malloc.h: New
+
+	* lib/Makefile.am: Add a file "my-malloc.[hc]" 
+
+2000-10-03  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/mmp-test.c: New file. I will remove this when "mmp" becomes
+	stable.
+
+	* lib/mmp.h: Modify.  Platform(Win vs UNIX) independent.
+
+	* lib/mmp.c: Modify.
+
+2000-10-02  YAMASHITA Tatsuo  <yto@nais.to>
+
+	* lib/mmp.h: WIN32 compatible
+
+	* lib/mmp.c: WIN32 compatible
+
+	* lib/Makefile.am: Add mmp.c and mmp.h
+
+	* lib/mmp.h: New.  (extracted from sufary.h)
+
+	* lib/mmp.c: New.  mmap related functions (extracted from file.c)
+
+2000-09-11  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* perl/DID/DID.xs (suf_didsearch): Bug fix.
+
+	* perl/SUFARY/SUFARY.xs (suf_find, suf_range_search,
+	suf_getposition): Bug fix.
+
+2000-09-11  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* Version 2.3.8 Release.
+
+2000-09-10  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* configure.in: Change version 2.3.7 --> 2.3.8
+
+	* sufary.spec: Change version 2.3.7 --> 2.3.8
+
+	* doc/ReferenceP.txt: update
+
+	* perl/SUFARY/test.pl: update
+
+	* perl/SUFARY/SUFARY.pm (get_position): New
+
+	* perl/SUFARY/SUFARY.xs (suf_get_position): New
+
+	* perl/SUFARY/SUFARY.pm (range_search): New
+
+	* perl/SUFARY/SUFARY.xs (suf_range_search): New 
+
+2000-08-22  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* src/sass.c (search_for_the_given_pattern): use func sa_ignore_case.
+	(expand_ignore_case): Remove.
+	(search_all_files): New! array_file_mode. 
+	  Ex: sass 'key_word' text_file_name -a array_file_name
+
+	* doc/ReferenceP.txt: Modify.
+
+	* perl/SUFARY/SUFARY.pm,SUFARY.xs(case_insensitive_search): New.
+
+2000-08-05  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* Makefile.am: Add ruby directory and sufary.spec to package.
+
+	* configure.in: Change version 2.3.6 --> 2.3.7
+
+	* sufary.spec: Change version 2.3.6 --> 2.3.7
+
+	* Version 2.3.7 Release.
+
+2000-08-04  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* doc/ReferenceP.txt: Modify
+
+	* perl/SUFARY/SUFARY.pm(get_region): New. Use this insted of get_block.
+
+	* perl/SUFARY/SUFARY.pm(get_line_info,get_region_info): New
+
+	* perl/SUFARY/SUFARY.xs(suf_get_line_info,suf_get_region_info): New 
+
+2000-07-17  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* perl/DID/test.txt.did: Modosu.
+	
+	* perl/SUFARY/test.txt.did: Modosu.
+
+	* perl/SUFARY/test.txt.ary: Modosu.
+
+2000-07-16  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* sufary.spec: Change Version 2.3.5 --> 2.3.6
+
+	* configure.in: Change Version 2.3.5 --> 2.3.6
+
+	* INSTALL: Add message.
+
+	* AUTHORS: Add kazuma-t.
+
+	* perl/DID/setup.sh: Update.
+
+	* perl/DID/test.pl: Modify.
+
+	* perl/DID/test.txt.did: Remake.
+	
+	* perl/SUFARY/test.pl: Add debug_mode.
+
+	* perl/SUFARY/test.txt.did: Remake.
+
+	* perl/SUFARY/test.txt.ary: Remake.
+
+	* perl/SUFARY/SUFARY.pm (debug_mode): New.
+
+	* perl/SUFARY/SUFARY.xs (suf_set_debug_mode): New.
+
+	* perl/SUFARY/setup.sh: Update.
+
+	* src/sang.c (do_sang_2): Remove a warning.
+
+	* src/af.c (print_result): Modify for compat.c-less
+
+	* lib/Makefile.am (libsufary_la_SOURCES): Remove compat.c
+
+2000-07-15  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* lib/compat.c: Remove.
+
+	* ruby/*: Rename find to search.
+
+2000-07-14  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* lib/sufary.h: Change REGEX_RESULT_LIST -> SA_RESULT_LIST
+
+	* lib/regex.c (sa_expand_ignore_case): New. (move from sass.c)
+	(sa_ignore_case): New.
+	(sa_free_result_list): Change name. free_regex_result_list -> this 
+
+	* src/sass.c (search_for_the_given_pattern): print "0" when
+        count_only_mode.
+	(get_one_region): Use str2sastr().
+
+	* lib/search.c (sa_easy_join): Remove.  He said "I'll be back."
+
+	* lib/sufary.h: Remove SA_INDEXES, SA_INDEX_PAIR.
+
+	* lib/make-index.c (sa_write_index): Modify for hook.
+	(sa_is_acceptable): New.
+
+	* lib/test.c: Renewal.
+
+	* lib/sufary.h (str2sastr): Move from compat.c to sufary.h 
+
+2000-07-13  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* src/mkary.c (main): Remove printf("\n")
+
+	* lib/make-index.c (sa_write_index): Add printf("\n")
+	(sa_is_sorted): Add printf("\n")
+
+	* lib/file.c (sa_closearrayfile): Remove free(ary)
+
+2000-07-11  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* doc/index-ja.html: Fix bugs.
+
+2000-07-08  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* lib/file.c (sa_close_did): Fix a bug. (compile error)
+
+2000-07-08  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* perl/SUFARY/SUFARY.xs (suf_error_no): New.
+
+	* perl/SUFARY/SUFARY.xs (suf_error_msg): Move from DID.xs.
+
+2000-07-07  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* doc/ReferenceP.txt: Update.
+
+	* ruby/sufary.c: Change SA_INDEX to off_t.
+	
+	* perl/DID: Re-write perl module.
+
+	* lib/file.c (sa_close): Free ary.
+
+	* lib/file.c (sa_close_did): Free d.
+	
+	* perl/SUFARY: Re-write perl module.
+
+2000-07-06  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* src/mkary.c: New mode = dump mode(by using sa_dump_all_suffixes).
+	example:  mkary hoge.txt; mkary -D hoge.txt
+
+	* lib/make-index.c (sa_dump_all_suffixes): New. for debug.
+
+	* lib/compat.c (str2sastr): Add cast '(char *)' to remove warning. 
+
+	* lib/make-index.c (sa_get_next_ip_after_delimiter)
+	(sa_get_next_ip_char) (sa_is_skip) (sa_skip_one_char)
+	(*sa_get_next_ip_hook): Change interface.
+
+	* lib/make-index.c: Change name  mki_mode -> m_mki_mode
+
+	* lib/make-did.c: New file (from make-index.c).
+
+	* lib/did.c (sa_didsearch): Modify binary search.
+
+2000-07-05  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* lib/compat.c (sa_get_region_by_scan): Retirement.  His
+	successors are sa_seek_context_lines and sa_seek_context_region.
+
+	* src/sass.c (get_one_region): Use sa_seek_context_* (insted of
+        sa_get_one_region) and SA_STRING.
+	(print_one_region): Use SA_STRING.
+	(print_sorted_result): Use SA_STRING.
+	(search_for_the_given_pattern): Use SA_STRING.
+
+	* lib/region.c (sa_position_in_string): New.
+
+2000-06-23  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* ruby/rkwicview.rb: New.
+
+2000-06-22  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* lib/make-index.c (multikey_qsort): Fix a bug.
+	文字列の比較が signed でだったので、strcmp の比較と異なった。
+	同じになるように修正。つまり、今までの multikey_qsort は qsort
+	を使った場合と array ファイルが異なってしまうのだ。3/23以降のmkary
+	で作ったarrayファイルはちょっとダメダメです。注意!
+	(sa_is_sorted): Achieve efficiency.
+
+
+2000-06-20  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* ruby/README.rd.ja, ruby/Referece.rd.ja: Write documents.
+
+	* Merge kirin branch to the main branch.
+
+2000-06-19  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* ruby/rsass.rb: sass for Ruby.
+
+	* ruby/sufary.c: Add the class for DocID.
+
+2000-06-18  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* doc/ja/libsufary.html: Describe about functions in lib/region.c.
+	
+	* lib/test.c: Use functions in lib/region.c.
+
+2000-06-17  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* lib/sufary.h (SA_INDEX): Change from off_t to long :-P
+
+	* lib/region.c (sa_seek_context_lines, sa_seek_context_region):
+	  eof pointed the real EOF + 1. Fix.
+
+	* ruby/sufary.c: Change some interfaces.
+
+2000-06-16  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* ruby/*: Ruby module.
+
+	* lib/compat.c (sa_get_region_by_scan): Move from search.c.
+
+2000-06-15  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* lib/region.c (sa_seek_context_region): New
+	(sa_seek_pattern_forward): New
+	(sa_seek_pattern_backward): New
+
+	* lib/compat.c: New
+	(sa_get_line, sa_get_lines, sa_get_block, sa_get_string): Move
+	from search.c.
+
+2000-06-14  TAKAOKA Kazuma  <kazuma-t@is.aist-nara.ac.jp>
+
+	* Start `Kirin-san' Project.
+
+	* lib/search.c, lib/did.c, lib/region.c: Split search.c.
+
+	* lib/region.c (sa_copy_text_region): New
+	(sa_dup_text_region): New
+	(sa_seek_context_lines): New
+	(sa_seek_bol): New
+	(sa_seek_eol): New
+
+	* lib/sufary.h (SA_INDEX): Change from long to off_t.
+
+2000-06-14  YAMASHITA Tatsuo  <yto@bi.mbn.or.jp>
+
+	* src/mkary.c: sort_checke_mode -> sort_check_mode (spell miss)
+	(main): Modify sort_check process.
+
+	* lib/make-index.c (sa_is_sorted): Move from lib/search.c
+	(print_progress_meter): Fix a bug for Solaris. 
+
+	* src/sass.c (search_all_files): Add error message output.
+
+2000-03-29  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/make-index.c (multikey_qsort): Add a trick for speed up.
+	Add a progress meter.
+	(sa_reverse_byte_order_array_file): Move to util.c and rename.
+	(sa_merge_blocks): Add a progress meter.
+
+2000-03-23  YAMASHITA Tatsuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/make-index.c: Hook! SA_INDEX (*sa_get_next_ip_hook)(SA_INDEX).
+	Change the treatment of byte-order.	
+	(sa_is_skip): New
+	(sa_skip_one_char): New
+	(sa_get_next_ip_after_delimiter): New
+	(sa_get_next_ip_char): New
+	(print_progress_meter): New. progress meter by satoru-t.
+	(sa_set_make_index_memory_size): New
+	(sa_sort_index_block): Remove
+	(multikey_qsort): New. But slow... Why???
+
+	* src/mkdid.c (main): Modify (make-index-mode).
+
+	* src/mkary.c (main): Modify (make-index-mode).
+
+	* lib/make-index.c (sa_write_index): Remove mki_mode from interface.
+	(sa_make_did): Remove mki_mode from interface.
+	(sa_set_make_index_mode): New. set mki_mode.
+
+2000-03-22  Tatsuo Yamashita  <yto@nais.to>
+
+	* CVS test from outside of NAIST.
+
+2000-03-10  Tatuo Yamasita  <tatuo-y@is.aist-nara.ac.jp>
+
+	* perl/SUFARY/test.perl: Trivial change.
+	* perl/DID/test-did.perl: Fix a bug.
+
+	* perl/SUFARY/Makefile.static.PL,perl/SUFARY/Makefile.PL,
+	perl/DID/Makefile.static.PL,perl/DID/Makefile.PL:
+        Change ../../lib/ --> ../../lib/.libs
+
+	* perl/SUFARY/SUFARY.pm: Fix a bug.
+
+2000-02-28  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/sass.c (search_for_the_given_pattern): Print a count with a
+ 	file name (-c, --count).
+
+	* src/sass.c (search_for_the_given_pattern): Add count_only_mode.
+	-c, --count.
+
+2000-02-14  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/search.c (sa_easy_join): New, JOIN operation, prototype,
+ 	taku-ku's request.
+
+2000-02-09  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/sang.c: trail and error.
+
+2000-02-08  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/mkary.c,src/mkdid.c,lib/test.c,lib/regex.c,src/af.c,
+ 	src/sass.c,src/sang.c: Use EXIT_SUCCESS, EXIT_FAILURE in exit()
+
+	* src/sang.c: Test.
+
+	* lib/sufary.h (dp): New macro.
+
+2000-02-07  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/sass.c (print_sorted_result): Speed up by using satoru-t's
+ 	idea.
+	% time sass-NEW -u -t '\n\n,\n\n' 'the ' ~/papers > /dev/null
+	20.68u 0.31s 0:21.76 96.4%
+	% time sass-OLD -u -t '\n\n,\n\n' 'the ' ~/papers > /dev/null
+	65.94u 0.35s 1:08.47 96.8%
+	
+	* configure.in: Change Version 2.3.4 --> 2.3.5
+
+	* src/sass.c (rgn_cmp): Remove.
+	(index_cmp): New.
+
+	* src/sass.c: Change "SA_INDEXES *rgnary;" to "SA_INDEX *rgnary;".
+	Output the results just in time.
+
+2000-02-06  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* configure.in: Change Version 2.3.3 --> 2.3.4
+
+	* src/sass.c: Include <assert.h>.  Add const.
+
+	* lib/regex.c: Add const.
+
+	* lib/make-index.c: Add const.
+
+	* lib/search.c: Add const.
+
+	* lib/file.c: Add const.
+
+	* lib/util.c: Add const.
+
+	* src/sass.c (parse_options): Add case '0' to fix a bug ('-9' and '-
+	12' are ok, but '-10', '-02' and '-0' are ng).
+	Remove a duplication in "0123456789hirsA:B:C::123456789kvdt:Su".
+
+	* lib/search.c (sa_get_region_by_scan): Fix a bug.  "from" should
+ 	not be -1.
+
+	* src/sass.c (search_for_the_given_pattern): Fix a bug.
+	bug = non-reentrant with -u, -s.
+	(print_one_region): Remove malloc. No need!
+	(search_all_files): New.  Extracted from main().
+
+2000-02-05  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/sass.c (print_one_region): Rename search_and_print_sub.  Use
+ 	sa_get_region_by_scan.
+	(search_for_the_given_pattern): Rename search_and_print.
+	(parse_options): New option -s --sort.  Sort results by the
+ 	position in the text. New option -u --uniq.  Avoid the duplication
+ 	of the results.
+	(get_one_region): Extracted from print_one_region
+	(print_sorted_result): New.  for --sort and --uniq.
+	(rgn_cmp): New.  for qsort.
+
+	* lib/search.c (sa_scan_forward,sa_scan_backward): Change
+ 	interface
+	(sa_get_region_by_scan): New way of getting sequence in text file.
+  	I want to replace sa_get_block(), sa_lines() with this.
+	(sa_get_position_in_string): Remove.  Use sa_get_region_by_scan
+ 	insted of this!
+
+	* src/sass.c (expand_ignore_case): New
+	(parse_tags): New
+
+2000-02-04  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/search.c (sa_scan_forward): New.
+	(sa_scan_backward): New.
+
+2000-02-03  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* configure.in: Change Version 2.3.2 --> 2.3.3
+
+	* lib/search.c (sa_get_block): Divide lines like "int tag1_len =
+	strlen(tag1)" declaration and assignment for easy debugging.
+
+	* src/sass.c (search_and_print_sub): Serious bug.  Use "static
+	char" (quick fix).
+
+	* src/sass.c: Intialize tag_str[]. (use menset)
+
+2000-01-18  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* configure.in: Add AM_MAINTAINER_MODE.
+
+	* Makefile.am: Use @MAINTAINER_MODE_TRUE@ to include
+	maintMakefile. 
+
+	* acinclude.m4: Remove libtool related macros.
+
+2000-01-10  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/{sass.c,mkary.c,af.c}: Change debug option '-D' -> '-d' 
+
+2000-01-04  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/mkary.c (main): Add sort-check-mode (test).
+
+	* lib/search.c (sa_is_sorted): New.  array ファイルがソートされて
+	いるかどうか調べる。
+
+2000-01-02  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/af.c: Chage long to SA_INDEX.  Delete struct doc_info.
+	(search_and_check): Rename -> check_keyword.  Change interface.
+	(search_and_print): Divide -> check_last_keyword, print_result.
+	(main): Add debug mode -D.
+
+1999-12-30  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/make-index.c: Remove 'size' in struct BLOCK.
+
+	* src/mkary.c (main): Change '-b' to '-M', 'number of blocks' to
+	'size of blocks'.
+	ブロック数指定からブロックサイズ(Mb単位)指定に方針を変更。
+
+	* lib/make-index.c (sa_sort_each_block): Rename
+	sa_sort_index_block_sub -> sa_sort_each_block.
+	Change interface. Add assertions.
+	(sa_merge_blocks): New function from sa_sort_index_block_sub.
+	(sa_sort_index_block): Change interface. Add assertions.
+
+	* src/mkary.c (main): Add debug mode. (-D)
+
+1999-12-28  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/search.c (sa_*):  Add assertions.
+
+	* lib/search.c (sa_get_lines): Fix a typical boundary bug.
+	  | char *str = malloc(size + 1);
+	  | str[size + 1] = '\0';  --->  str[size] = '\0';
+
+	* lib/util.c (sa_dprintf): Rename dprintf -> sa_dprintf.
+	(conflicting on VineLinux1.1)
+
+	* lib/search.c (get_middle): Remode.
+	Use "cur = li / 2 + ri / 2 + (1 & li & ri)" (by takuya-n).
+
+	* COPYING: Add SUFARY License Draft
+
+	* lib/make-index.c: Add <assert.h>
+
+1999-12-09  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/sufary.h: Add <stdio.h>
+
+1999-12-09  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* Makefile.am (cxref): New rule for using cxref.
+	(global): New rule for using global.
+	(HTAGS): New rule for using global.
+	(GTAGS): New rule for using global.
+	
+1999-12-05  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* configure.in: Change Version 2.3.1 --> 2.3.2
+
+	* Makefile.am (EXTRA_DIRS): Add man.
+
+	* perl/DID/test-did.perl: Move SUFARY/testdid.perl to
+	DID/test-did.perl
+
+	* doc/ja/libsufary.html: Rename reference-c.html -->
+	libsufary.html
+
+	* lib/search.c (get_middle): New.  Safety and overflow free!
+
+	* doc/ja/reference-c.html: Modify.
+
+	* doc/samp/sample{,-did}.c: New.  Sample programs for
+	doc/ja/reference-c.html.
+
+	* lib/search.c (sa_get_start_position,sa_get_end_position): New
+	functions to access DID.
+	(sa_dididx2txtidx): Change extern to static.
+
+	* lib/sufary.h: Rename SA_STATE --> SA_STAT, SA_STAT er -->
+	SA_STAT stat.
+
+	* lib/search.c: Delete access functions for {SUF,DID}_RESULT.
+	(MIN): Rename MINMIN --> MIN.
+
+1999-12-05  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* Makefile.am (always_built_SUBDIRS): Move man from EXTTRA_DIRS.
+
+	* lib/Makefile.am (noinst_PROGRAMS): Renamed from bin_PROGRAMS.
+
+	* man/sass.1: New file.
+	
+	* configure.in (AC_OUTPUT): Add man/Makefile.
+	
+	* man/Makefile.am: New file.
+	
+	* lib/Makefile.am (include_HEADERS): Renamed from pkginclude_HEADERS.
+
+	* configure,aclocal.m4,Makefile.in,lib/Makefile.in,
+	src/Makefile.in: Removed due to autogenizing.
+
+	* autogen.sh: New file to autogenize.
+	
+	* acinclude.m4: Add contents of libtool.m4.
+
+	* config.guess,config.sub,ltconfig,ltmain.sh: New files to
+	libtoolize. 
+
+1999-12-02  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/sass.c (search_and_print_sub): Use
+ 	sa_get_position_in_string.  New mode (option) --tags, which prints
+ 	blocks including a keyword without DocID file.
+
+	* lib/search.c (sa_get_lines): Rewrite loops.
+	(sa_get_block): Rewrite a loop.
+	(sa_get_position_in_string): New.  An ad hoc way to know the
+	position of a keyword in a result string of
+	sa_get_{line,lines,block}.
+
+1999-12-01  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/sass.c: New --- debug mode.
+
+	* lib/{sufary.h,search.c} (sa_set_debug_mode): New.
+
+	* lib/search.c (sa_didsearch): Modify source for readability.
+
+	* lib/search.c (sa_didsearch): Use dprintf.
+
+1999-11-30  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* {*.[ch],*.xs}: Change function names.  sa_open, sa_close,
+	sa_open_did, sa_close_did, sa_get_block, sa_get_line,
+	sa_get_lines, sa_get_string.
+
+	* perl/{DID/DID.xs,SUFARY/SUFARY.xs}: Use access
+	functions.  Example: ary->arraysize => sa_array_size(ary)
+
+	* perl/SUFARY/Makefile{.static,}.PL: Add -Wall to INC.
+
+	* lib/{sufary.h,file.c}: Change function names (add "get"). 
+	char* sa_get_text_ptr(SUFARY * ary);
+	SA_INDEX sa_get_text_size(SUFARY * ary);
+	SA_INDEX* sa_get_array_ptr(SUFARY * ary);
+	SA_INDEX sa_get_array_size(SUFARY * ary);
+	SA_INDEX* sa_get_did_ptr(DID * did);
+	SA_INDEX sa_get_did_size(DID * did);
+	
+	* lib/{sufary.h,search.c}: New access functions.  *** Not used ***
+	SA_INDEX sa_get_left(SUF_RESULT* sr);
+	SA_INDEX sa_get_right(SUF_RESULT* sr);
+	SA_STATE sa_get_state(SUF_RESULT* sr);
+	SA_INDEX sa_get_region_start(DID_RESULT* dr);
+	SA_INDEX sa_get_region_size(DID_RESULT* dr);
+	SA_INDEX sa_get_region_no(DID_RESULT* dr);
+	SA_STATE sa_get_region_state(DID_RESULT* dr);
+
+	* lib/search.c: Change some member's types in struct
+	SA_BSEARCH_RESULT.
+
+1999-11-28  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/search.c: Use dprintf.
+
+	* lib/util.c (dprintf): New function for debug output.
+
+	* lib/sufary.h: Add "extern".
+
+	* lib/search.c (sa_find): Fix a serious bug.
+	(..._prefix_len = keylen; --> ..._prefix_len = keylen +
+	base_txt_skip;)
+	
+	* lib/search.c (sa_bsearch): New function.
+	(cmp_sistr): Change the type of key.  char[] -> int[].
+
+	* lib/util.c (sa_eprintf): Delete.
+
+	* lib/search.c (sa_find): Change for source readability.
+
+	* lib/util.c (sa_eprintf): stderr -> stdout
+
+1999-11-26  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/{regex.c,make-index.c}: Change prefix "global_" to "m_", 
+	since a module variable is not equal to a global variable.
+
+1999-11-25  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/sufary.h (SA_STATE): Rename eresult to SA_STATE.  Rename
+ 	CONT to SUCCESS.
+
+	* lib/{sufary.h,search.c},src/af.c: Add an state valiable to
+ 	DID_RESULT.  And change the way of error handling (sa_didsearch).
+
+1999-11-24  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/{util.h,util.c} : Delete or Modify byte-order related
+ 	functions. sa_reverse_byte... be type-independent.
+	
+	* lib/*.[hc]: Change long to SA_INDEX.
+
+	* lib/my_mmap.c: Change all function names and interfaces. Delete
+ 	is_mmap_fail.  Remove this file.  Move all contents to file.c.
+	
+	* lib/my_mmap.h: Remove this file.  Move all contents to sufary.h.
+	
+1999-11-23  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/{sufary.h,file.c}
+	(sa_text_ptr,sa_text_size,sa_array_ptr,sa_array_size,sa_did_ptr):
+ 	New functions for data-hinding.
+
+	* lib/util.h (MSB_ON): Change macro name. EIGHTH_BIT_ON -> MSB_ON
+
+	* lib/my_mmap.h (mmap_get_ptr,mmap_get_size,is_mmap_fail): New
+	functions for access local variables.
+
+	* lib/sufary.h: Change member valiables in DID, SUFARY.
+
+	* lib/my_mmap.c (open_mmap): Change interface.
+
+	* lib/{my_mmap.c,my_mmap.h} : New files.
+
+1999-11-22  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/sufary.h: Use enum for error-id.
+
+	* src/mkdid.c: Use new function from sa_make_did.
+	
+	* lib/make-index.c (sa_make_did): New function from mkdid.c.
+
+	* lib/{make-index.c,file.c} : Use new function
+	sa_add_suffix_to_file_name.
+
+	* lib/util.[ch] (sa_add_suffix_to_file_name): New function.
+
+1999-11-19  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/mkary.c: Simplify source.
+
+	* lib/util.h: Move macro EIGTHT_BIT_ON from regex.c to util.h.
+
+	* lib/make-index.c: New functions (sa_set_*, sa_get_*).
+
+	* lib/make-index.c (sa_write_index): Change
+	make_fisrt_array_file in src/mkary.c to sa_write_index.
+
+	* {src,lib}/*.[ch]: Remove Time-stamp.
+
+1999-11-18  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* src/sass.c (show_usage): Add a copyright statement.
+	(parse_options): Add -v, --version option.
+
+	* src/sass.c: Include "config.h"
+
+1999-11-18  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/af.c: Fix a serious bug.
+
+	* lib/file.c (sa_fwrite): New function.
+
+	* lib/util.{h,c}: New files.
+
+	* {lib,src}/*.c: Change comment style (\*\*+ -> \*).
+
+	* src/mkdid.c (reverse_byte_order): Remove this function.
+	Use sa_reverse_byte_order_long in library.
+
+	* lib/search.c (sa_is_little_endian,sa_reverse_byte_order_long):
+	Add prefix "sa_".
+	* src/sass.c (search_and_print): Fix a memory leak bug.
+
+	* lib/{sufary.h,regex.c} (new_regex_result_list): macro ->
+	finction "sa_regex_store_one_result".
+
+	* lib/{regex.c,make-index.c},src/{af.c,sass.c}: Change function
+	names with an initial underscore such as "_func_name"  to
+	"func_name_sub".
+	
+1999-11-17  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/make-index.c,src/{mkary.c,mkdid.c}: Change "w" to "wb" in
+	fopen() (See C-FAQ 12.38, February 7, 1999).
+
+	* configure.in,lib/{regex.c,make-index.c},src/{mkdid.c}: Use gcc
+ 	option "-pedantic" (See C-FAQ 18.7, February 7, 1999).  Remove all
+ 	warnings (except getopt.c).
+
+	* {src,lib}/*.c: Remove casts of all malloc(). (See C-FAQ 7.7,
+	February 7, 1999)
+
+1999-11-12  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/sufary.h: Change "struct eresult".  Delete ERROR and EXIT.
+
+	* lib/file.c: New functions open_mmap() and close_mmap().
+
+	* src/mkary.c: Use library-functions (in make-index.c).
+
+	* lib/make-index.c: New file for making a array-file.
+	
+	* lib/sufary.h: Change static functions "int
+ 	is_little_endian(void)" and "long reverse_byte_order_long(long p)"
+ 	in "search.c" to public functions.
+
+1999-11-11  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/search.c: Add sa_did_size().  Revival!
+
+1999-11-10  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* doc/ja/reference-c.html: Modify "C Library Reference" (in
+	Japanese). Add new section.
+
+1999-11-08  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* src/sass.c (ck_atoi): New function imported from GNU grep 2.3.
+	(parse_options): Use ck_atoi() instead of atoi() for error handling.
+	(parse_options): Implement -C option.
+	(parse_options): Refine -NUM option.
+	(_search_and_print): Comment out: printf("%ld:%ld:", lpos, pos - lpos);
+	(_search_and_print): print "--\n" if context exists.
+	
+1999-11-07  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/sass.c: New option '-k' emphasizes keyword strings in the
+ 	results output.
+
+	* src/sass.c: Delete all comments in Japanese.  New options '-A,
+	--after-context', '-B --before-context' and '-NUM' (0 < NUM <= 9).
+	
+1999-11-01  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* doc/ja/reference-c.html: New file.  'C Library Reference Guide'.
+
+1999-10-26  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/regex.c: Use 'enum' instead of 'define'.  Give a name to the
+ 	magic number '8'.
+
+1999-10-25  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/regex.c (_sa_regex_set_bits): Fix a serious bug(memset).
+  	Revisions 1.6-1.9 can not regex-search on PC(Linux and FreeBSD).
+	
+	* perl/SUFARY/{test.perl,testdid.perl}: Trivial changes.
+	
+	* lib/test.c (main): Modify 'memory leak bug'.
+
+	* src/mkary.c (main): Change return type of `main' ('void' to
+	`int').
+
+	* Makefile.am (EXTRA_DIRS): Add EXTRA_DIRS 'perl'.
+
+1999-10-24  NAKAYAMA Takuya  <takuya-n@is.aist-nara.ac.jp>
+
+	* perl/*/*: Add Perl Modules.
+	
+1999-10-20  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* doc/en/make-index.html: Fix description for byte-order treatment.
+	
+	* doc/**/*.html: Remove 
+	<meta http-equiv="Content-Type" content="...."> line due to its
+	unfavorableness. see:
+	<http://www.fxis.co.jp/DMS/sgml/html_correct_charset.html>
+
+1999-10-18  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* doc/{index.html,index-ja.html,sufary.css,en/,
+	jp/make-index.html}: New files. HTML-ization.
+
+1999-10-14  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/af.c: Change layout and style.  Remove sleep(1).
+
+	* lib/search.c (sa_didsearch): Enforce big-endian byte order. 
+	
+	* lib/search.c (sa_dididx2txtidx): New function for byte order
+	handling.
+
+	* src/mkdid.c: Enforce big-endian byte order. Change layout and
+ 	style.
+
+1999-10-14  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* lib/sufary.h: Include "config.h"
+
+	* lib/search.c (is_little_endian): Use WORDS_BIGENDIAN macro.
+	
+	* configure.in: Add AC_C_BIGENDIAN.
+	
+	* src/sass.c: Introduce show_mini_usage() function.
+
+	* src/sass.c: Rename usage() to show_usage().
+	
+	* src/sass.c: Use getopt_long() for command line parsing.
+	
+	* src/getopt{,1}.[ch]: New files.
+
+	* src/sass.c: Modify the usage message.
+	
+1999-10-13  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/sass.c (search_and_print): Implement regex-search and
+	ignore-case-seach.
+
+	* src/sass.c: Change layout and style.  Modify "NULL keyword bug".
+
+	* lib/search.c (sa_aryidx2txtidx,sa_aryidx2txtptr): Enforce
+	big-endian byte order (except for DocID search).
+	
+	* lib/search.c (is_little_endian,reverse_byte_order_long): 
+	New function by satoru-t.
+
+	* lib/search.c (sa_find): Change ary->array[cur] to
+	sa_aryidx2txtidx(ary, cur). Enforce big-endian byte order.
+	
+	* src/mkary.c (reverse_byte_order): Change sizeof(int) to
+	sizeof(long).
+
+	* src/mkary.c: Change layout and style for readability.  Output
+ 	big-endian byte ordering for all machines. Modify a usage message.
+
+	* src/mkary.c (print_msg): New useful function. print verbose
+	messages.
+	
+1999-10-05  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/search.c (sa_eprintf): New function. print a error message
+	and exit.
+
+	* lib/search.c: Modification for source readability.
+	
+1999-09-27  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Add 1.4.
+	
+	* configure.in: Add AC_PREREQ(2.13).
+
+1999-09-27  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/{search.c,sufary.h,regex.c,test.c}: Apply a shell command
+	"indent -kr" to these files.
+	
+	* lib/{search.c,regex.c}: Change a variable name "offset" to
+	"txt_skip".
+
+	* lib/{search.c,sufary.h,regex.c}: Move "Time-stamp" to 2nd line. 
+
+1999-09-26  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* src/sass.c (main): Modify a usage message.
+
+1999-09-25  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/regex.c: Use BIT_VECTORS to handle all bit vectors for
+ 	character.
+
+	* lib/regex.c: Trivial changes for source readability.
+
+1999-09-22  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/regex.c (_sa_regex): Fix a serious bug.
+
+	* lib/regex.c: Implement '?' handling.
+
+	* lib/regex.c: Employ more efficient way of "2nd char bit-vector"
+ 	hadling.  Use char*[] insted of BIT_VECTOR_LIST.
+	
+	* lib/regex.c: New file (dirived from search.c).
+
+1999-09-21  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/search.c: Implement negated character class handling for 
+	2 bytes characters, like '[^XX-YYZZ]'.
+	
+	* lib/search.c: Implement range indication handling for 2 bytes
+	characters like '[XX-YY]'.
+
+	* lib/search.c: Change layout and style. Based on "CODE
+	COMPLETE"(book).
+	
+	* lib/search.c (_sa_regex_match_one_char): Inplement '\n', '\t', '
+	\x8E' handling.
+
+	* lib/search.c (bit_unset,bit_print,bit_multi_set): Add new macros
+	and functions to handle bit vector.
+
+	* lib/search.c (_sa_regex_match_alternation): Alternation is
+ 	available!  Sample: 'abc(hoge|uhi|d)efg'. In alternation, wild
+ 	card and character class are unusable.
+
+	* lib/search.c (_sa_regex): Divide into some subroutines.
+	_sa_regex_match_*, _sa_regex_store_result are new ones.  Change
+	interface.
+
+	* lib/{search.c,sufary.h,test.c}: Use REGEX_RESULT_LIST insted of
+	LONG_LIST.
+
+1999-09-20  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/search.c (_sa_regex,_sa_regex_wchar_search): Modify to
+ 	handle 2 bytes char in regex. Wild card is ok. Character class
+ 	[XXYYZZ] is ok, but [XX-YY] is not available.
+
+	* lib/search.c (bit_set,bit_found): Make macros to handle bit
+	vector.
+
+	* lib/{search.c,sufary.h}: Change bad data structure name 'LongList'
+ 	to LONG_LIST. Employ new way "Add item to end of list". Make a
+ 	macro and a function to handle LONG_LIST.
+
+1999-09-19  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/{search.c,sufary.h,test.c}: New data structure
+	LongList. Result of regex search is stored.
+
+	* lib/search.c (_sa_regex): Apply bitvector approach.
+
+	* configure.in (AM_INIT_AUTOMAKE): Change version: 2.3.0 -> 2.3.1
+
+	* lib/search.c (sa_regex): Change regexp to regex.
+
+	* lib/search.c (_sa_regexp): New function for regexp (prototype).
+
+1999-09-18  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* lib/search.c (sa_find): Modify binary-search related codes.
+
+1999-09-18  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* configure.in: Abolish AC_CHECK_LIB(m, main)
+
+1999-09-17  YAMASITA Tatuo  <tatuo-y@is.aist-nara.ac.jp>
+
+	* src/Makefile.am: Add ChangeLog.1 to EXTRA_DIST. Remove
+	CLEANFILES and CLEANDIRS.
+
+	* src/mkdid.c: Modify to be compilable.
+
+	* ChangeLog.1: New file.
+
+1999-09-17  Satoru Takabayashi  <satoru-t@is.aist-nara.ac.jp>
+
+	* {src,lib}/Makefile.am (LIBS): Remove. (-lm)
+	
+	* src/Makefile.am: Comment out `array' related entries.
+	
+	* src/Makefile.{array,tools}: Removed.
+	
+	* src/mkdids.in: Abosish nasty $SADIRS variable.
+	
+	* src/mkdids.perl: Renamed: mkdids.perl -> mkdids.in
+	
+	* ChageLog, ChageLog.2, ChageLog.3: Renamed:
+	s/ChageLog/ChangeLog/
+
+	* Makefile.am, install-sh, missing, mkinstalldirs, stamp-h.in,
+	configure.in, acconfig.h, acinclude.m4, aclocal.m4,
+	Makefile.in, configure, config.h.in, lib/Makefile.in,
+	lib/Makefile.am, src/Makefile.in, src/Makefile.am:
+	New files for configurized.
+

@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "sufary.h"
+
+main(int argc, char *argv[])
+{
+  char *s;
+  SUFARY *ary;
+  long i, pos;
+  
+  if ((ary = sa_openfiles(argv[2],NULL)) == NULL) fprintf(stderr,"Error\n");
+
+  if (sa_sel(ary, argv[1]) == CONT){
+    for (i = sa_left(ary); i <= sa_right(ary) ; i++){
+      pos = sa_aryidx2txtidx(ary, i);
+      s = sa_getline(ary, pos);
+      printf("%s:%ld: %s\n", argv[1], pos, s);
+      free(s);
+    }
+  }
+  sa_closefiles(ary);
+}

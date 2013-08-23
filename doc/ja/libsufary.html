@@ -1,0 +1,561 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<HTML lang="ja">
+<HEAD>
+  <META http-equiv="content-type" content="text/html; charset=iso-2022-jp">
+  <link rel=stylesheet href="../sufary.css">
+  <link rev=made href="mailto:tatuo-y@is.aist-nara.ac.jp">
+  <link rel="NEXT" HREF="http://cl.aist-nara.ac.jp/lab/nlt/ss/">
+  <title>SUFARY: C Reference</title>
+</head>
+<body>
+<h1>C ライブラリリファレンスガイド ( 未完成 )</h1>
+$Id: libsufary.html,v 1.3 2000/07/14 11:30:50 tatuo-y Exp $
+<address>
+山下 達雄 Yamasita, Tatuo, 高岡 一馬 Takaoka, Kazuma
+</address>
+<hr>
+
+<ul>
+<li><a href="#intro">はじめに</a>
+<li><a href="#compile">コンパイルの方法</a>
+<li><a href="#array">文字列検索</a>
+  <ul>
+  <li><a href="#io">関数：ファイルの開閉</a>
+  <li><a href="#search">関数：文字列検索</a>
+  <li><a href="#get-result">関数：検索結果を取り出す</a>
+  <li><a href="#sample.c">サンプルプログラム</a>
+  </ul>
+<li><a href="#regex">正規表現を用いた検索</a>
+  <ul>
+  <li><a href="#regex-func">関数</a>
+  <li><a href="#regex-error">エラー処理</a>
+  </ul>
+<li><a href="#docid">DocID ファイルによるテキストエリアの取り出し</a>
+  <ul>
+  <li><a href="#docid-func">関数</a>
+  <li><a href="#sample_did.c">サンプルプログラム</a>
+  </ul>
+<li><a href="#make-index">インデックスファイルの作成</a>
+  <ul>
+  <li><a href="#mkary">array ファイルの作成</a>
+  <li><a href="#mkdid">DocID ファイルの作成</a>
+  </ul>
+<li><a href="#changes">version 2.1.x からの変更点</a>
+</ul>
+
+<hr>
+
+<dl>
+<dt>Notation
+<dd>
+$SUFRAY : SUFARYパッケージを展開したディレクトリを表します。
+</dl>
+
+
+<h2><a name="intro">はじめに</a></h2>
+
+<p>
+この文書では、SUFARY の C ライブラリの使い方について解説します。
+array ファイル、DocID ファイルについてご存知ない方は、
+先に「<a href="make-index.html">検索用ファイル作成ガイド</a>」をお読み下さい。
+</p>
+
+
+
+<h2><a name="compile">コンパイルの方法</a></h2>
+
+<p>
+C プログラムから SUFARY を使うには、まず <code>sufary.h</code> を
+インクルードします。
+</p>
+
+<p class="caption">// sample.c //</p>
+
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "sufary.h"
+...
+</pre>
+
+<p>
+そして、以下のようにコンパイルします。
+</p>
+
+<p class="caption">// コンパイル //</p>
+
+<pre>
+%  $SUFARY/libtool --mode=link gcc -I$SUFARY/lib -o sample sample.c \
+$SUFARY/lib/libsufary.la
+
+ or
+
+%  gcc -I$SUFARY/lib -o sample sample.c $SUFARY/lib/libsufary.a
+</pre>
+
+<p>
+<code>$SUFARY/src/</code> に C ライブラリを用いたプログラムが
+ありますので、参考にして下さい。
+</p>
+
+
+<h2><a name="array">文字列検索</a></h2>
+
+
+<h3><a name="io">関数：ファイルの開閉</a></h3>
+
+<dl>
+<dt><code>SUFARY *sa_open(char *text_file_name, char *array_file_name)</code>
+<dd>
+検索のためにテキストファイルと array ファイルを開きます。
+引数にそれぞれのファイル名を指定します。
+array ファイル名に NULL を指定すると、
+array ファイル名は「テキストファイル名 + ".ary"」
+になります。
+
+<p class="caption">// 例 //</p>
+<pre>
+/* data.txt -&gt; data.txt.ary */
+SUFARY *ary = sa_open("data.txt", NULL);
+</pre>
+
+ファイルを開くのに成功した場合は、
+SUFARY 型変数へのポインタを、失敗した場合は NULL を返します。
+SUFARY 型変数は検索時に必ず必要になります。
+
+<dt><code>void sa_close(SUFARY *ary)</code>
+<dd>
+テキストファイルとarrayファイルを閉じます。
+
+<dt><code>SA_INDEX sa_get_array_size(SUFARY *ary)</code>
+<dd>
+array ファイルに含まれる要素の数を返します。
+
+<dt><code>SA_INDEX sa_get_text_size(SUFARY *ary)</code>
+<dd>
+テキストファイルの大きさを返します。
+
+</dl>
+
+
+<h3><a name="search">関数：文字列検索</a></h3>
+
+<dl>
+<dt><code>SUF_RESULT sa_find(SUFARY *ary, SA_INDEX left, SA_INDEX right, char *keyword, int keyword_length, int base_txt_skip)</code>
+<dd>
+キーワード検索を行ないます。
+<ul>
+<li><code>keyword</code> でキーワードを、
+<code>keyword_length</code> でキーワードの長さ ( 大抵の場合は 
+<code>strlen(keyword)</code> ) を指定します。
+<li><code>left</code>, <code>right</code> は検索する範囲を表します。
+「0 から suffix array のサイズ ( <code>sa_get_array_size(ary)</code> ) - 1」まで
+の値を取ることができます。
+<li><code>base_txt_skip</code> は、
+テキスト側の比較開始位置を <code>base_txt_skip</code> 文字後ろにずらします。
+特殊なことをしない限り 0 を指定します。
+</ul>
+検索結果は SUF_RESULT 型変数として返されます。
+
+<p class="caption">// SUF_RESULT //</p>
+<pre>
+typedef struct {
+    SUFARY *suf;
+    SA_INDEX left;
+    SA_INDEX right;
+    SA_STAT stat;
+} SUF_RESULT;
+</pre>
+
+<p class="caption">// 例：一般的な使い方 //</p>
+<pre>
+char *key = "hello";
+SUF_RESULT sr = sa_find(ary, 0, sa_get_array_size(ary) - 1, key, strlen(key), 0);
+</pre>
+
+キーワードの見つかった場所は範囲で表されます。
+これらは <code>sr.left</code> と <code>sr.right</code> に格納されます。
+キーワードにマッチする文字列が見つからなければ
+<code>sr.stat</code> に FAIL が、
+見つかれば SUCCESS が格納されます。
+
+</dl>
+
+
+<h3><a name="get-result">関数：検索結果を取り出す</a></h3>
+
+<p>
+suffix array ( array ファイル ) の各要素にはテキスト位置情報
+ ( テキストの先頭からの文字数 ) が格納されています。
+検索結果は suffix array の添字の情報だけです。
+文字列として扱うためには、
+これをテキスト位置、文字列ポインタに変換する関数が必要となります。
+</p>
+
+<dl>
+<dt><code>SA_INDEX sa_aryidx2txtidx(SUFARY *ary, SA_INDEX i)</code>
+<dd>
+suffix array の添字をテキスト位置に変換します。
+
+<dt><code>char *sa_aryidx2txtptr(SUFARY *ary, SA_INDEX i)</code>
+<dd>
+suffix array の添字を文字列ポインタに変換します。
+
+<dt><code>char *sa_txtidx2txtptr(SUFARY *ary, SA_INDEX i)</code>
+<dd>
+テキスト位置を文字列ポインタに変換します。
+</dl>
+
+<p>
+テキスト位置を元に検索結果を文字列として取り出す関数もいくつか
+用意してあります。
+</p>
+
+<dl>
+<dt><code>SA_STRING sa_seek_context_lines(const SUFARY *ary, char *pos, int bkwrd, int frwrd)</code>
+<dd>
+<code>pos</code> を含む一行と、その前の <code>bkwrd</code> 行、
+後の <code>frwrd</code> 行を <code>SA_STRING</code> 型として取り出します。
+
+<p class="caption">// SA_STRING //</p>
+<pre>
+typedef struct {
+    char *ptr;
+    size_t len;
+} SA_STRING;
+</pre>
+
+<dt><code>SA_STRING sa_seek_context_region(const SUFARY *ary, char *pos, const SA_STRING begin_tag, const SA_STRING end_tag)</code>
+<dd>
+単純なテキストエリア取り出し処理を行います。
+テキスト位置で指定された周辺の指定されたタグ (
+<code>begin_tag</code>, <code>end_tag</code> ) で囲まれた文字列を取り出します。
+指定されたテキスト位置の前後をスキャンしてタグを探すという単純な方法なので、
+DocID ファイルは必要有りませんが、
+DocID ファイルを用いる方法より遅くなります。
+
+<dt><code>size_t sa_copy_region(char *dst, const SA_STRING src)</code>
+<dd>
+文字列 <code>str</code> を <code>dst</code> にコピーし、末尾にナル文字
+を追加します。<code>dst</code> は <code>src.len + 1</code> バイト確保
+されている必要があります。
+
+<dt><code>char *sa_dup_region(const SA_STRING src)</code>
+<dd>
+<code>malloc</code> でメモリを確保して、文字列 <code>str</code>コピー
+し末尾にナル文字を追加します。
+</dl>
+
+
+<h3><a name="sample.c">サンプルプログラム</a></h3>
+
+<p class="caption">// sample.c //</p>
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "sufary.h"
+
+int main(int argc, char *argv[])
+{
+    SUFARY *ary;
+    SUF_RESULT sr;
+
+    ary = sa_open(argv[2], NULL);
+    if (ary == NULL)
+        exit(1);
+
+    sa_set_debug_mode(1);
+
+    sr = sa_find(ary, 0, sa_get_array_size(ary) - 1, argv[1], strlen(argv[1]), 0);
+    printf("%ld %ld\n", sr.left, sr.right);
+
+    if (sr.stat == SUCCESS) {
+        SA_INDEX tmp;
+        for (tmp = sr.left; tmp &lt;= sr.right; tmp++) { /* '&lt;=' に注意 */
+            SA_INDEX index = sa_aryidx2txtidx(ary, tmp);
+	    char *pointer = sa_aryidx2txtptr(ary, tmp);
+	    SA_STRING str, btag, etag;    
+	    char *txt_ptr;
+
+            printf("★テキストファイルの %ld 文字目からマッチ\n", index);
+            printf("★先頭二文字表示(1)\n%.*s\n", 2, pointer);
+	    str.ptr = pointer;
+	    str.len = 2;
+            txt_ptr = malloc(3);
+	    sa_copy_region(txt_ptr, str);
+            printf("★先頭二文字表示(2)\n%s\n", txt_ptr);
+            free(txt_ptr);
+            txt_ptr = sa_dup_region(str);
+            printf("★先頭二文字表示(3)\n%s\n", txt_ptr);
+            free(txt_ptr);
+
+            str = sa_seek_context_lines(ary, pointer, 0, 0);
+            printf("★一行表示\n%.*s\n", str.len, str.ptr);
+            str = sa_seek_context_lines(ary, pointer, 1, 1);
+            printf("★前後の一行も表示\n%.*s\n", str.len, str.ptr);
+	    btag.ptr = "&lt;DOC&gt;"; btag.len = 5;
+            etag.ptr = "&lt;/DOC&gt;"); etag.len = 6;
+            str = sa_seek_context_region(ary, pointer, btag, etag);
+            printf("★DOC タグに囲まれた領域を表示\n%.*s\n", str.len, str.ptr);
+        }
+    }
+
+    sa_close(ary);
+    return 0;
+}
+</pre>
+
+
+
+<h2><a name="regex">正規表現を用いた検索</a></h2>
+
+<p>
+<em>注意：
+正規表現検索周りはまだ作業中のため
+今後仕様が著しく変更される可能性があります。
+</em>
+</p>
+
+
+<h3><a name="regex-func">関数</a></h3>
+
+<dl>
+<dt><code>SA_RESULT_LIST *sa_regex(SUFARY * ary, SA_INDEX left, SA_INDEX right, char *keyword, int keyword_length)</code>
+<dd>
+正規表現を用いた検索を行います。
+<ul>
+<li><code>keyword</code> でキーワードを、
+<code>keyword_length</code> でキーワードの長さ ( 大抵の場合は 
+<code>strlen(keyword)</code> ) を指定します。
+<li><code>left</code>, <code>right</code> は検索する範囲を表します。
+0 から「suffix array のサイズ ( <code>sa_get_array_size(ary)</code> ) - 1」まで
+の値を取ることができます。
+</ul>
+検索結果はリスト構造になっています。
+
+<dt><code>SA_RESULT_LIST *sa_ignore_case(SUFARY * ary, SA_INDEX left, SA_INDEX right, char *keyword, int keyword_length)</code>
+<dd>
+大文字小文字の違いを無視した検索を行います。
+<ul>
+<li><code>keyword</code> でキーワードを、
+<code>keyword_length</code> でキーワードの長さ ( 大抵の場合は 
+<code>strlen(keyword)</code> ) を指定します。
+<li><code>left</code>, <code>right</code> は検索する範囲を表します。
+0 から「suffix array のサイズ ( <code>sa_get_array_size(ary)</code> ) - 1」まで
+の値を取ることができます。
+</ul>
+検索結果はリスト構造になっています。
+
+<dt><code>void sa_free_result_list(SA_RESULT_LIST *listp)</code>
+<dd>
+検索結果のリストを消します。
+
+</dl>
+
+<h3><a name="regex-error">エラー処理</a></h3>
+
+考え中...
+
+
+<h2><a name="docid">DocID ファイルによるテキストエリアの取り出し</a></h2>
+
+
+<h3><a name="docid-func">関数</a></h3>
+
+<dl>
+<dt><code>DID *sa_open_did(char *file_name)</code>
+<dd>
+DocID ファイルを開きます。
+ファイルを開くのに成功した場合は、 DID 型変数へのポインタを、失敗した場合は
+NULL を返します。
+
+<dt><code>sa_close_did(DID *did)</code>
+<dd>
+DocID ファイルを閉じます。
+
+<dt><code>DID_RESULT sa_didsearch(DID *did, SA_INDEX target)</code>
+<dd>
+テキスト位置 <code>target</code> が含まれるテキストエリアの
+開始位置 ( <code>start</code> )、
+大きさ ( <code>size</code> )、
+通し番号 ( <code>no</code> ) 等の情報を取ってきて、
+DID_RESULT 型変数に格納します。
+
+<p class="caption">// DID_RESULT //</p>
+<pre>
+typedef struct {
+    SA_INDEX start;
+    SA_INDEX size;
+    SA_INDEX no;
+    SA_STAT stat;
+} DID_RESULT;
+</pre>
+
+該当するテキストエリアがなければ、<code>stat</code>
+に FAIL が、あれば SUCCESS が入ります。
+
+<p class="caption">// 例 //</p>
+<pre>
+DID_RESULT dr = sa_didsearch(did, 192);
+if (dr.stat == SUCCESS)
+    printf("no. %ld, start %ld, size %ld\n", dr.no, dr.start, dr.size);
+</pre>
+
+<dt><code>SA_INDEX sa_get_start_position(DID *did, SA_INDEX i)</code>
+<dd>
+<code>i</code> 番目のテキストエリアの開始位置位置を得ます。
+
+<dt><code>SA_INDEX sa_get_end_position(DID *did, SA_INDEX i)</code>
+<dd>
+<code>i</code> 番目のテキストエリアの終了位置を得ます。
+
+<dt><code>SA_INDEX sa_get_did_size(DID *did)</code>
+<dd>
+DocID ファイルで取り出すことのできる
+テキストエリアの数を得ます。
+
+<p class="caption">// 例：全テキストエリアを表示 //</p>
+<pre>
+for (i = 0; i &gt; sa_get_did_size(did); i++) {
+	SA_INDEX doc_start = sa_get_start_position(did, i);
+	SA_INDEX doc_end = sa_get_end_position(did, i);
+	printf("-- Text Area No. %ld\n%.*s\n", i, doc_end - doc_start, 
+	       sa_txtidx2txtptr(ary, doc_start));
+}
+</pre>
+
+
+
+</dl>
+
+
+<h3><a name="sample-did.c">サンプルプログラム</a></h3>
+
+<p class="caption">// sample-did.c //</p>
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "sufary.h"
+
+int main(int argc, char *argv[]) 
+{
+    SUFARY *ary;
+    DID *did;
+    SUF_RESULT sr;
+
+    ary = sa_open(argv[2], NULL);
+    did = sa_open_did(argv[3]);
+    if (ary == NULL || did == NULL)
+        exit(1);
+
+    printf("★いくつあるかな ... %ld\n", sa_get_did_size(did));
+
+    sr = sa_find(ary, 0, sa_get_array_size(ary) - 1, argv[1], strlen(argv[1]), 0);
+    if (sr.stat == SUCCESS) {
+        SA_INDEX tmp;
+        for (tmp = sr.left; tmp &lt;= sr.right; tmp++) { /* '&lt;=' に注意 */
+            SA_INDEX pos = sa_aryidx2txtidx(ary, tmp);
+            DID_RESULT dr = sa_didsearch(did, pos);
+            if (dr.stat == FAIL)
+                continue;
+            printf("★ no. %ld, start %ld, size %ld\n",
+                   dr.no, dr.start, dr.size);
+            printf("★テキストエリア表示(1)\n");
+            printf("%.*s\n", dr.size, sa_txtidx2txtptr(ary, dr.start));
+            printf("★テキストエリア表示(2)\n");
+            printf("%.*s\n", dr.size,
+                   sa_txtidx2txtptr(ary, sa_get_start_position(did, dr.no)));
+        }
+    }
+
+    sa_close_did(did);
+    sa_close(ary);
+    return 0;
+} 
+</pre>
+
+
+
+<h2><a name="make-index">インデックスファイルの作成</a></h2>
+
+
+<h3><a name="mkary">array ファイルの作成</a></h3>
+
+<h3><a name="mkdid">DocID ファイルの作成</a></h3>
+
+
+<h2><a name="changes">version 2.1.x からの変更点</a></h2>
+
+<p>
+version 2.1.x から 3.x へ移行する際に、
+マイナーバージョンアップではできないような大幅な仕様変更を行いました。
+</p>
+
+<ul>
+<li>
+文字列検索結果の受渡し方法が変更されました。
+SUF_RESULT
+という構造体に検索結果情報が格納されます。
+そのため、
+<code>long sa_left(SUFARY *)</code>, 
+<code>long sa_left(SUFARY *)</code> は廃止されました。
+代わりに、
+<code>sr.left</code>, <code>sr.right</code> を使用します
+( <code>sr</code> を SUF_RESULT 型の変数とする )
+。
+
+<li>
+テキストエリア検索結果の受渡し方法が変更されました。
+DID_RESULT
+という構造体に検索結果情報が格納されます。
+そのため、
+<code>long sa_doc_start(DID *)</code>, 
+<code>long sa_doc_size(DID *)</code>,
+<code>long sa_doc_no(DID *)</code> は廃止されました。
+代わりに、
+<code>dr.start</code>, <code>dr.size</code>, <code>dr.no</code> を使用します
+( <code>dr</code> を DID_RESULT 型の変数とする )
+。
+<code>sa_didsearch(DID *, SA_INDEX)</code>
+の返し値も <code>void</code> から <code>DID_RESULT</code> に変わりました。
+
+<li>
+文字列検索関数
+<code>eresult sa_sel(SUFARY *, char *)</code>, 
+<code>eresult sa_search(SUFARY *, char *, int, int)</code> 
+は廃止されました。
+代わりに
+<code>SUF_RESULT sa_find(SUFARY *, SA_INDEX, SA_INDEX, char *, int, int)</code>
+を使って下さい。
+<code>long *sa_common_prefix_search(SUFARY *, char *, char)</code>
+はライブラリレベルでは必要ではないと判断し廃止しました。
+検索の初期化関数 <code>void sa_reset(SUFARY *)</code> は
+検索結果構造体 SUF_RESULT の登場により不要となったので
+廃止しました。
+
+<li>その他の変更点
+
+<table border=2>
+<tr><td>Version 2.1.x</td><td>Version 3.x</td>
+<tr><td>sa_getline</td><td></td>
+<tr><td>sa_getlines</td><td>sa_seek_context_lines</td>
+<tr><td>sa_getblock</td><td>sa_seek_context_region</td>
+<tr><td>sa_getstr</td><td></td>
+<tr><td>sa_openfiles</td><td>sa_open</td>
+<tr><td>sa_closefiles</td><td>sa_close</td>
+<tr><td>sa_opendid</td><td>sa_open_did</td>
+<tr><td>sa_closedid</td><td>sa_close_did</td>
+<tr><td>sa_did_size</td><td>sa_get_did_size</td>
+<tr><td>eresult</td><td>SA_STAT</td>
+</table>
+
+</ul>
+
+
+<hr>
+<address>
+tatuo-y@is.aist-nara.ac.jp
+</address>
+</body>
+</html>

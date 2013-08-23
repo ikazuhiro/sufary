@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+        "http://www.w3.org/TR/REC-html40/strict.dtd">
+<!-- $Id: index-ja.html,v 1.6 2000/07/14 11:30:49 tatuo-y Exp $ -->
+<html>
+<head>
+<link rel=stylesheet href="sufary.css">
+<link rev=made href="mailto:tatuo-y@is.aist-nara.ac.jp">
+<link rel="NEXT" HREF="http://cl.aist-nara.ac.jp/lab/nlt/ss/">
+<title>SUFARY: How to make index-files</title>
+</head>
+<body lang="ja">
+
+<div>
+[ <a href="index.html">英語</a> / <a href="index-ja.html">日本語</a> ]
+
+<a href="http://cl.aist-nara.ac.jp/lab/nlt/ss/">SUFARY ホームページ</a>
+</div>
+
+<h1>SUFARY マニュアル</h1>
+<p>Last Modified: 1999-10-18</p>
+<address>
+山下 達雄 Yamasita, Tatuo
+</address>
+<hr>
+
+<h2>SUFARY とは?</h2>
+
+<p>
+SUFARY とは suffix arrayというデータ構造を用いて高速な文字列
+検索を行なうためのライブラリを中心としたパッケージです。
+suffix array については文献 [1] を御参照下さい。
+suffix array はテキスト中のあらゆる suffix (接尾辞) を指すポインタを
+suffix でソートした配列で、
+作成にはクイックソートを用いて最悪で O(N log N) 時間、
+検索には二分探索を用いて O(P log N) 時間かかります。
+ここらあたりの詳しい解説は 「SUFARY ガイド」[2] を御参照下さい。
+</p>
+
+<ol>
+<li>Udi Manber and Gene Myers,
+"Suffix arrays: A new method for on-line string searches",
+1st ACM-SIAM Symposium on Discrete Algorithms, pp.319-327, 1990.
+<li>山下 達雄, "SUFARY ガイド",
+NAIST Computational Lingustic Laboratory,
+<a href="http://cl.aist-nara.ac.jp/lab/nlt/ss/">&lt;http://cl.aist-nara.ac.jp/lab/nlt/ss/&gt;</a>, 1999. (PostScript 版と PDF 版があります。)
+</ol>
+
+
+<h2>目次</h2>
+
+<ul>
+<li><a href="ja/make-index.html">検索用ファイル作成ガイド</a>
+<li><a href="ja/tools.html">付属アプリケーション利用ガイド</a>
+<li><a href="ja/libsufary.html">C ライブラリリファレンスガイド</a>
+<li><a href="ReferenceP.txt">Perl モジュールリファレンスガイド</a>
+</ul>
+
+
+<hr>
+
+<address>
+tatuo-y@is.aist-nara.ac.jp
+</address>
+
+</body>
+
+</html>

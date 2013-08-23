@@ -1,0 +1,11 @@
+MANIFEST
+Makefile.PL
+Makefile.static.PL
+SUFARY.pm
+SUFARY.xs
+setup.sh
+test.pl
+test.txt
+test.txt.ary
+test.txt.did
+typemap

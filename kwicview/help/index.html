@@ -1,0 +1,24 @@
+┏━━━━━━━━━━━━━┓
+┃KWICVIEW オンラインヘルプ ┃
+┗━━━━━━━━━━━━━┛
+
+$w.rst.t1 insert end "  "; 
+button $w.rst.t1.sikumi -text " KWICVIEW の仕組み " -borderwidt 0 -bg skyblue -command "online_help help/sikumi.html $w";
+$w.rst.t1 window create insert -window $w.rst.t1.sikumi;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+$w.rst.t1 insert end "  "; 
+button $w.rst.t1.sousa -text " ボタンなどの説明 " -borderwidth 0 -bg skyblue -command "online_help help/sousa.html $w";
+$w.rst.t1 window create insert -window $w.rst.t1.sousa;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+$w.rst.t1 insert end "  "; 
+button $w.rst.t1.opt -text " 実行時のオプション " -borderwidth 0 -bg skyblue -command "online_help help/opt.html $w";
+$w.rst.t1 window create insert -window $w.rst.t1.opt;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUFARY             Version 2.0   1998/06/02
+
+written by たつを(tatuo-y@cl.aist-nara.ac.jp)
+END

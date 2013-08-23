@@ -1,0 +1,39 @@
+┏━━━━━━━━━┓
+┃KWICVIEW の仕組み ┃
+┗━━━━━━━━━┛
+
+button $w.rst.t1.back -text "もどる" -borderwidth 0 -bg skyblue -command "online_help help/index.html $w";
+$w.rst.t1 window create insert -window $w.rst.t1.back;
+$w.rst.t1 insert end "\n"; incr line_no;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KWICVIEWの基本的な仕組みについて説明します。
+
+KWICVIEWとは高速全文検索エンジンarrayのグラフィカル・ユーザ・インターフェース(いわゆるGUI)です。
+KWICVIEWは、基本的には、検索エンジンarrayにキーワードを渡して検索してもらい、その結果を受け取ってユーザに表示するという仕事を行ないます。
+下の図に概念図を示します。
+
+
+KWICVIEW
+  ↓↑
+高速全文検索エンジンarray
+   ↑
+検索対象ファイル
+
+
+KWICVIEWとarrayとの間の通信(データ受渡し)は結構いい加減です。
+KWICVIEWが固まって動かなくなったら、原因は通信の不手際に間違いありません。
+再起動するしかありません。
+
+検索対象ファイルにはインデックスファイルが必要になります。
+例えば、「/home/tatuo-y/file1」というファイルに対しては「/home/tatuo-y/file1.ary」というインデックスファイルがなければ検索を行なうことができません。
+インデックスファイルを作成するためにはSUFARYパッケージに含まれているmkaryというプログラムを使用します。
+詳しくはマニュアルを御覧下さい。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+button $w.rst.t1.back2 -text "もどる" -borderwidth 0 -bg skyblue -command "online_help help/index.html $w";
+$w.rst.t1 window create insert -window $w.rst.t1.back2;
+$w.rst.t1 insert end "\n"; incr line_no;
+END
+
+
