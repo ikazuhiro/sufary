@@ -26,7 +26,7 @@ extern "C" {
 
 #define SA_FILE_NAME_MAX 1000
 
-typedef long SA_INDEX;
+typedef int SA_INDEX;
 
 
 typedef enum sa_error_ {
