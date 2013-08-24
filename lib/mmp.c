@@ -86,16 +86,19 @@ sa_open_mmap_aux(SA_MMAP *mm, const char *fname, const SA_MMAP_MODE mode)
     unsigned long mode1;
     unsigned long mode2;
     unsigned long mode3;
+    unsigned long mode4;
 
     /* set parameters */
     if (mode == SA_MMAP_RO) {
 	mode1 = GENERIC_READ;
 	mode2 = PAGE_READONLY;
 	mode3 = FILE_MAP_READ;
+	mode4 = FILE_SHARE_READ;
     } else if (mode == SA_MMAP_RW) {
 	mode1 = GENERIC_READ | GENERIC_WRITE;
 	mode2 = PAGE_READWRITE;
 	mode3 = FILE_MAP_ALL_ACCESS;
+	mode4 = 0;
     } else {
 	return 1;
     }
@@ -104,7 +107,7 @@ sa_open_mmap_aux(SA_MMAP *mm, const char *fname, const SA_MMAP_MODE mode)
     if (mm->other == NULL)
         return 1;
 
-    mmp_handles.hFile = CreateFile(fname, mode1, 0, NULL,
+    mmp_handles.hFile = CreateFile(fname, mode1, mode4, NULL,
 				   OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (mmp_handles.hFile == INVALID_HANDLE_VALUE)
         return 1;
