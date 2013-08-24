@@ -179,7 +179,7 @@ sa_sort_index_divide_and_merge(char *ary_fname)
 	return FAIL;
     }
 
-    // I have to free all *bl
+    /* I have to free all *bl */
     sa_free(bl);
 
     return SUCCESS;
@@ -437,7 +437,7 @@ sa_write_index(const char *txt_fname, char *ary_fname,
     m_text_ptr = sa_get_mmap_ptr(mmr);
     txtstr.len = sa_get_mmap_size(mmr);
     txtstr.ptr = sa_get_mmap_ptr(mmr);
-//    printf("%ld %ld\n", txtstr.len, size_of_text_file);
+    /* printf("%ld %ld\n", txtstr.len, size_of_text_file); */
 
 
     if (sa_mki_mode & SA_VERBOSE)
@@ -494,7 +494,7 @@ swap_vector(SA_INDEX i, SA_INDEX j, SA_INDEX n, SA_INDEX *x)
 static unsigned char
 get_char_inside_text(char *ptr)
 {
-    //	printf("%x %x %x 000\n",ptr, m_text_last_ptr, (ptr- m_text_last_ptr));
+    /* printf("%x %x %x 000\n",ptr, m_text_last_ptr, (ptr- m_text_last_ptr)); */
     if (ptr - m_text_last_ptr >= 0) {
 	return 0;
     }
@@ -513,10 +513,10 @@ multikey_qsort(SA_INDEX *x, char *txt, SA_INDEX n, SA_INDEX depth)
 
     if (n <= 1000) {
 	/* trick for speed up */
-	// m_text_ptr += depth;
+	/* m_text_ptr += depth; */
 	qsort(x, (size_t)n, sizeof(SA_INDEX),
 	      (int (*)(const void *, const void *))suffix_compare);
-	// m_text_ptr -= depth;
+	/* m_text_ptr -= depth; */
 	if (sa_mki_mode & SA_VERBOSE) {
 	    m_progress_counter += n;
 	    print_progress_meter(m_progress_counter, m_size_of_array_file);
@@ -527,14 +527,14 @@ multikey_qsort(SA_INDEX *x, char *txt, SA_INDEX n, SA_INDEX depth)
     a = rand() % n;
     swap(x, 0, a);
     v = get_char_inside_text(txt + x[0] + depth);
-    //assert(v == (unsigned char)((txt + x[0])[depth]));
+    /* assert(v == (unsigned char)((txt + x[0])[depth])); */
     a = b = 1;
     c = d = n-1;
     for (;;) {
         while (b <= c && (r = 
 			  get_char_inside_text(txt + x[b] + depth)
 			  -v) <= 0) {
-	    //assert(r+v == (unsigned char)((txt + x[b])[depth]));
+	    /* assert(r+v == (unsigned char)((txt + x[b])[depth])); */
             if (r == 0) {
                 swap(x, a, b);
                 a++;
@@ -544,7 +544,7 @@ multikey_qsort(SA_INDEX *x, char *txt, SA_INDEX n, SA_INDEX depth)
         while (b <= c && (r =
 			  get_char_inside_text(txt + x[c] + depth)
 			  -v) >= 0) {
-	    //assert(r+v == (unsigned char)((txt + x[c])[depth]));
+	    /* assert(r+v == (unsigned char)((txt + x[c])[depth])); */
             if (r == 0) {
                 swap(x, c, d);
                 d--;
@@ -589,7 +589,7 @@ sa_is_sorted(const SUFARY *ary)
 	if (sa_mki_mode & SA_VERBOSE)
 	    print_progress_meter(i, max);
 	if (sa_strcmp(
-//sa_get_text_ptr(ary) + sa_get_text_size(ary),
+/* sa_get_text_ptr(ary) + sa_get_text_size(ary), */
 		      pre_str, now_str) > 0) {
 	    if (sa_mki_mode & SA_VERBOSE) {
 		printf("\n");
@@ -602,7 +602,7 @@ sa_is_sorted(const SUFARY *ary)
 		printf("***%d***\n", pre_str[0] - now_str[0]);
 		printf("===%d===\n",
 		       sa_strcmp(
-//sa_get_text_ptr(ary) + sa_get_text_size(ary),
+/* sa_get_text_ptr(ary) + sa_get_text_size(ary), */
 				 pre_str, now_str));
 	    }
 	    return 0;

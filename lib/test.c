@@ -219,7 +219,7 @@ ignore_case_seach(char *pattern)
 int main(int argc, char *argv[])
 {
     printf("\n===\n=== make index (character-based)\n===\n");
-//    sa_set_make_index_mode(SA_EUC_2);
+    /* sa_set_make_index_mode(SA_EUC_2); */
     make_index(sa_get_next_ip_char);
 
     printf("\n===\n=== search both ends \n===\n");    

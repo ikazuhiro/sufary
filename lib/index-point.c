@@ -198,7 +198,7 @@ static SA_INDEX sa_skip_one_char_utf8(SA_STRING sstr, SA_INDEX ip)
 	return ip + 4;
     } else {
         /* invalid character */
-//        printf("invalid character at %d", cursor - bof);
+        /* printf("invalid character at %d", cursor - bof); */
 	assert("utf8 invalid character" && 0);
 	return 1;
     }

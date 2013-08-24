@@ -178,7 +178,7 @@ extern SA_INDEX sa_get_next_ip_after_delimiter(SA_STRING sstr, SA_INDEX ip);
 extern void sa_set_my_delimiters(char *p);
 extern char *sa_get_my_delimiters(void);
 
-//extern SA_INDEX (*sa_get_next_ip_hook)(SA_STRING, SA_INDEX);
+/* extern SA_INDEX (*sa_get_next_ip_hook)(SA_STRING, SA_INDEX); */
 
 
 #ifdef __cplusplus
