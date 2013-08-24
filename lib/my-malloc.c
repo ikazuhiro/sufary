@@ -65,7 +65,7 @@ sa_malloc_aux(size_t size, char *file, int line)
     tmp->size = size;
     tmp->next = sa_malloc_list_top;
     tmp->line = line;
-    strcpy(tmp->file, file); // FIXME
+    strcpy(tmp->file, file); /* FIXME */
     sa_malloc_list_top = tmp;
 
     return ptr;
@@ -92,7 +92,7 @@ sa_calloc_aux(size_t nmemb, size_t size, char *file, int line)
     tmp->size = size;
     tmp->next = sa_malloc_list_top;
     tmp->line = line;
-    strcpy(tmp->file, file); // FIXME
+    strcpy(tmp->file, file); /* FIXME */
     sa_malloc_list_top = tmp;
 
     return ptr;
