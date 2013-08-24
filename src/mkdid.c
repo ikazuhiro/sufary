@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <string.h>
 #include "sufary.h"
 #include "did.h"
 #include "util.h"

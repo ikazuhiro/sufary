@@ -499,7 +499,7 @@ sa_regex_match_one_char(
 	    else if (key[1] == 't')
 		dcc = '\t';
 	    else if (key[1] == 'x') {
-		int hex2int;
+		unsigned int hex2int;
 		int sscanf_ok = sscanf(key + 2, "%2x", &hex2int);
 		assert(sscanf_ok);
 		dcc = hex2int;
@@ -673,8 +673,8 @@ sa_expand_ignore_case(char *new_key, const char *key)
     for (i = 0; i < (int)strlen(key); i++) {
         if (isalpha((unsigned char)key[i])) {
             new_key[j] = '[';
-            new_key[j + 1] = tolower(key[i]);
-            new_key[j + 2] = toupper(key[i]);
+            new_key[j + 1] = tolower((int)key[i]);
+            new_key[j + 2] = toupper((int)key[i]);
             new_key[j + 3] = ']';
             j += 4;
         } else if (key[i] == '[' || key[i] == ']' || key[i] == '\\' ||
