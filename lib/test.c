@@ -99,7 +99,7 @@ make_did()
     assert(sa_make_did(fname, NULL, didfn, "* ", NULL) == SUCCESS);
     assert((did = sa_open_did(didfn)) != NULL);
     assert(sa_get_did_size(did) > 0);
-    printf("DID_SIZE: %ld\n", sa_get_did_size(did));
+    printf("DID_SIZE: %d\n", sa_get_did_size(did));
     sa_close_did(did);
 }
 
@@ -151,7 +151,7 @@ get_did()
  	  break;
 	dr = sa_didsearch(did, sa_aryidx2txtidx(ary, i));
 	assert(dr.stat == SUCCESS);
-	printf("REGION %d: no. %ld, start %ld, size %ld\n",
+	printf("REGION %d: no. %d, start %d, size %d\n",
 	       cnt, dr.no, dr.start, dr.size);
 	printf(" >>>>>\n %.*s\n <<<<<<\n", (int)dr.size,
 	       sa_txtidx2txtptr(ary, dr.start));

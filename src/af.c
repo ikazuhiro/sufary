@@ -147,7 +147,7 @@ static int do_kensaku(SUFARY *ary, DID *did, char *key){
 	    SA_INDEX ntas;
 	    if ((ntas = check_keyword(ary, did, sr, checker)) == 0)
 		return 0;
-	    printf("[%s] in %ld text areas.\n", keys[i], ntas);
+	    printf("[%s] in %d text areas.\n", keys[i], ntas);
 	} else {
 	    printf("NOT FOUND [%s]\n", keys[i]);
 	    return 0;
@@ -164,7 +164,7 @@ static int do_kensaku(SUFARY *ary, DID *did, char *key){
 	SA_INDEX how_many;
 
 	how_many = check_last_keyword(ary, did, sr, &tas, checker * 2 - 2);
-	printf("FOUND %ld\n",how_many);
+	printf("FOUND %d\n",how_many);
 	if (display_char_num > 0) /* <= 0 : 検索結果記事数だけ表示 */
 	    print_result(ary, &tas, how_many);
 	sa_free(tas);

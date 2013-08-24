@@ -263,7 +263,7 @@ sa_sort_each_block(SA_INDEX bl_size, SA_INDEX num_of_indexes, BLOCK **bl)
 	tmp->max = tmp->aryidx + size;
 
 	if (sa_mki_mode & SA_VERBOSE)
-	    printf(" Block %d (%ld -> %ld)\n",
+	    printf(" Block %d (%d -> %d)\n",
 		   (int)(j / bl_size) + 1, tmp->aryidx, tmp->max);
 
 	multikey_qsort(m_array_ptr + tmp->aryidx, m_text_ptr, size, 0);
