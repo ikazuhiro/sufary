@@ -593,13 +593,13 @@ sa_is_sorted(const SUFARY *ary)
 		      pre_str, now_str) > 0) {
 	    if (sa_mki_mode & SA_VERBOSE) {
 		printf("\n");
-		printf("%ld\n", (long int)i);
+		printf("%d\n", i);
 		printf("last = %x, %x %x\n", 
 		       (int)(sa_get_text_ptr(ary) + sa_get_text_size(ary)),
 		       (int)pre_str, (int)now_str);
-		printf("[[[%x]]]\n", pre_str[0]);
-		printf("(((%x)))\n", now_str[0]);
-		printf("***%d***\n", pre_str[0] - now_str[0]);
+		printf("[[[%x]]]\n", (int)pre_str[0]);
+		printf("(((%x)))\n", (int)now_str[0]);
+		printf("***%d***\n", (int)(pre_str[0] - now_str[0]));
 		printf("===%d===\n",
 		       sa_strcmp(
 /* sa_get_text_ptr(ary) + sa_get_text_size(ary), */
